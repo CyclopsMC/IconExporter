@@ -1,0 +1,3 @@
+libs_path=[path_to_jar_dependencies (see forge.gradle)]
+cyclopscore_version_local=[custom built cyclopscore version]
+

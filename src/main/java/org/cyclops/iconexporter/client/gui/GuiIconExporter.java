@@ -71,7 +71,7 @@ public class GuiIconExporter extends GuiScreen {
             value.getSubItems(CreativeTabs.SEARCH, subItems);
             for (ItemStack subItem : subItems) {
                 tasks.set(tasks.get() + 1);
-                String subKey = key + ":" + subItem.getMetadata() + (subItem.hasTagCompound() ? subItem.getTagCompound().toString() : "");
+                String subKey = key + ":" + subItem.getMetadata() + (subItem.hasTagCompound() ? "__" + subItem.getTagCompound().toString() : "");
                 exportTasks.add(() -> {
                     taskProcessed.set(taskProcessed.get() + 1);
                     Minecraft.getMinecraft().player.sendStatusMessage(new TextComponentString(String.format("Rendering %s / %s", taskProcessed.get(), tasks.get())), true);

@@ -1,5 +1,7 @@
 package org.cyclops.iconexporter;
 
+import com.google.common.collect.Maps;
+import net.minecraft.command.ICommand;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.Mod.EventHandler;
@@ -7,12 +9,16 @@ import net.minecraftforge.fml.common.Mod.Instance;
 import net.minecraftforge.fml.common.SidedProxy;
 import net.minecraftforge.fml.common.event.*;
 import org.apache.logging.log4j.Level;
+import org.cyclops.cyclopscore.command.CommandMod;
 import org.cyclops.cyclopscore.config.ConfigHandler;
 import org.cyclops.cyclopscore.config.extendedconfig.ItemConfigReference;
 import org.cyclops.cyclopscore.init.ItemCreativeTab;
 import org.cyclops.cyclopscore.init.ModBaseVersionable;
 import org.cyclops.cyclopscore.init.RecipeHandler;
 import org.cyclops.cyclopscore.proxy.ICommonProxy;
+import org.cyclops.iconexporter.command.CommandExport;
+
+import java.util.Map;
 
 /**
  * The main mod class of this mod.
@@ -26,7 +32,8 @@ import org.cyclops.cyclopscore.proxy.ICommonProxy;
         version = Reference.MOD_VERSION,
         dependencies = Reference.MOD_DEPENDENCIES,
         guiFactory = "org.cyclops.iconexporter.GuiConfigOverview$ExtendedConfigGuiFactory",
-        certificateFingerprint = Reference.MOD_FINGERPRINT
+        certificateFingerprint = Reference.MOD_FINGERPRINT,
+        clientSideOnly = true
 )
 public class IconExporter extends ModBaseVersionable {
     
@@ -50,6 +57,13 @@ public class IconExporter extends ModBaseVersionable {
     @Override
     protected RecipeHandler constructRecipeHandler() {
         return new RecipeHandler(this);
+    }
+
+    @Override
+    protected ICommand constructBaseCommand() {
+        Map<String, ICommand> commands = Maps.newHashMap();
+        commands.put(CommandExport.NAME, new CommandExport(this));
+        return new CommandMod(this, commands);
     }
 
     /**

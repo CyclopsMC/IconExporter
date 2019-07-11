@@ -1,6 +1,5 @@
 package org.cyclops.iconexporter;
 
-import org.apache.logging.log4j.Level;
 import org.cyclops.cyclopscore.config.ConfigurableProperty;
 import org.cyclops.cyclopscore.config.ConfigurableType;
 import org.cyclops.cyclopscore.config.ConfigurableTypeCategory;
@@ -52,6 +51,12 @@ public class GeneralConfig extends DummyConfig {
      */
     @ConfigurableProperty(category = ConfigurableTypeCategory.CORE, comment = "If the version checker should be enabled.")
     public static boolean versionChecker = true;
+
+    /**
+     * The default image width in px to render at.
+     */
+    @ConfigurableProperty(category = ConfigurableTypeCategory.CORE, comment = "The default image width in px to render at.")
+    public static int defaultScale = 32;
 
     /**
      * The type of this config.

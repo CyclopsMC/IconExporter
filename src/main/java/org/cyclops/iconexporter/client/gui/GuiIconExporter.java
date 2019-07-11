@@ -4,15 +4,13 @@ import com.google.common.collect.Queues;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.creativetab.CreativeTabs;
-import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.NonNullList;
 import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.text.TextComponentString;
+import net.minecraft.util.text.TextComponentTranslation;
 import org.cyclops.cyclopscore.datastructure.Wrapper;
 import org.cyclops.cyclopscore.helper.Helpers;
-import org.cyclops.cyclopscore.helper.L10NHelpers;
 
 import java.io.File;
 import java.io.IOException;
@@ -43,13 +41,13 @@ public class GuiIconExporter extends GuiScreen {
 
         if (exportTasks.isEmpty()) {
             Minecraft.getMinecraft().displayGuiScreen(null);
-            Minecraft.getMinecraft().player.sendMessage(new TextComponentString("Finished exporting"));
+            Minecraft.getMinecraft().player.sendMessage(new TextComponentTranslation("gui.itemexporter.finished"));
         } else {
             IExportTask task = exportTasks.poll();
             try {
                 task.run();
             } catch (IOException e) {
-                Minecraft.getMinecraft().player.sendMessage(new TextComponentString("Error while exporting"));
+                Minecraft.getMinecraft().player.sendMessage(new TextComponentTranslation("gui.itemexporter.error"));
                 e.printStackTrace();
                 Minecraft.getMinecraft().displayGuiScreen(null);
             }
@@ -74,7 +72,7 @@ public class GuiIconExporter extends GuiScreen {
                 String subKey = key + ":" + subItem.getMetadata() + (subItem.hasTagCompound() ? "__" + subItem.getTagCompound().toString() : "");
                 exportTasks.add(() -> {
                     taskProcessed.set(taskProcessed.get() + 1);
-                    Minecraft.getMinecraft().player.sendStatusMessage(new TextComponentString(String.format("Rendering %s / %s", taskProcessed.get(), tasks.get())), true);
+                    Minecraft.getMinecraft().player.sendStatusMessage(new TextComponentTranslation("gui.itemexporter.status", taskProcessed.get(), tasks.get()), true);
                     drawRect(0, 0, this.scale, this.scale, BACKGROUND_COLOR);
                     ItemRenderUtil.renderItem(subItem, this.scale);
                     ImageExportUtil.exportImageFromScreenshot(baseDir, subKey, this.width, this.height, this.scale, BACKGROUND_COLOR);

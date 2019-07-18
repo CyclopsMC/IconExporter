@@ -1,10 +1,14 @@
 package org.cyclops.iconexporter.client.gui;
 
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.Gui;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.RenderHelper;
 import net.minecraft.client.renderer.RenderItem;
 import net.minecraft.item.ItemStack;
+import net.minecraftforge.fluids.Fluid;
+import net.minecraftforge.fluids.FluidStack;
+import org.cyclops.cyclopscore.helper.GuiHelpers;
 
 /**
  * Utilities for rendering items.
@@ -40,6 +44,11 @@ public class ItemRenderUtil {
 
         GlStateManager.popMatrix();
         RenderHelper.disableStandardItemLighting();
+    }
+
+    public static void renderFluid(Gui gui, Fluid fluid, int scale) {
+        GlStateManager.scale(scale / 16, scale / 16, scale / 16);
+        GuiHelpers.renderFluidSlot(gui, new FluidStack(fluid, Fluid.BUCKET_VOLUME), 0, 0);
     }
 
 }

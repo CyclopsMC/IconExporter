@@ -44,7 +44,12 @@ public class ImageExportUtil {
         // Write the file
         key = key.replaceAll(":", "__");
         File file = new File(dir, key + ".png").getCanonicalFile();
-        ImageIO.write(bufferedImage, "png", file);
+        try {
+            ImageIO.write(bufferedImage, "png", file);
+        } catch (NullPointerException e) {
+            e.printStackTrace();
+            throw new IOException("Error while writing the PNG image " + file);
+        }
     }
 
     /** A buffer to hold pixel values returned by OpenGL. */

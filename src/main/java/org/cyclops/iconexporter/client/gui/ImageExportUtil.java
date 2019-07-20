@@ -5,6 +5,8 @@ import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.OpenGlHelper;
 import net.minecraft.client.renderer.texture.TextureUtil;
 import net.minecraft.client.shader.Framebuffer;
+import org.apache.logging.log4j.Level;
+import org.cyclops.iconexporter.IconExporter;
 import org.lwjgl.BufferUtils;
 
 import javax.imageio.ImageIO;
@@ -43,12 +45,17 @@ public class ImageExportUtil {
 
         // Write the file
         key = key.replaceAll(":", "__");
-        File file = new File(dir, key + ".png").getCanonicalFile();
         try {
-            ImageIO.write(bufferedImage, "png", file);
-        } catch (NullPointerException e) {
-            e.printStackTrace();
-            throw new IOException("Error while writing the PNG image " + file);
+            File file = new File(dir, key + ".png").getCanonicalFile();
+            try {
+                ImageIO.write(bufferedImage, "png", file);
+            } catch (NullPointerException e) {
+                e.printStackTrace();
+                throw new IOException("Error while writing the PNG image " + file);
+            }
+        } catch (IOException e) {
+            IconExporter.clog(Level.ERROR, "Error while writing the PNG image for key " + key);
+            throw e;
         }
     }
 

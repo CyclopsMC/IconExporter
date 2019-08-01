@@ -1,0 +1,9 @@
+As always, don't forget to backup your world before updating!
+Requires CyclopsCore version 1.0.6 or higher.
+
+Additions:
+* Export fluid registry with 'fluid__' file prefix
+
+Changes:
+* Log file names on IOExceptions to console when ImageIO failed, #3
+* Improve error message when ImageIO failed, #2

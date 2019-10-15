@@ -1,0 +1,31 @@
+modLoader="javafml"
+loaderVersion="[28.1,)"
+issueTrackerURL="https://github.com/CyclopsMC/IconExporter/issues"
+[[mods]]
+modId="iconexporter"
+version="${file.jarVersion}"
+displayName="IconExporter"
+displayURL="https://www.curseforge.com/minecraft/mc-mods/iconexporter"
+logoFile="logo.png"
+authors="rubensworks (aka kroeser)"
+description='''
+Exports item and block icons to files.
+'''
+[[dependencies.iconexporter]]
+    modId="cyclopscore"
+    mandatory=true
+    versionRange="[1.5.4,)"
+    ordering="NONE"
+    side="BOTH"
+[[dependencies.iconexporter]]
+    modId="forge"
+    mandatory=true
+    versionRange="[28.1,)"
+    ordering="NONE"
+    side="BOTH"
+[[dependencies.iconexporter]]
+    modId="minecraft"
+    mandatory=true
+    versionRange="[1.14.4]"
+    ordering="NONE"
+    side="BOTH"

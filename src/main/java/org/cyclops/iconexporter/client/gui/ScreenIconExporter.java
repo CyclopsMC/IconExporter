@@ -2,15 +2,15 @@ package org.cyclops.iconexporter.client.gui;
 
 import com.google.common.collect.Queues;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiScreen;
-import net.minecraft.creativetab.CreativeTabs;
+import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.fluid.Fluid;
 import net.minecraft.item.Item;
+import net.minecraft.item.ItemGroup;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.NonNullList;
 import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.text.TextComponentTranslation;
-import net.minecraftforge.fluids.Fluid;
-import net.minecraftforge.fluids.FluidRegistry;
+import net.minecraft.util.text.TranslationTextComponent;
+import net.minecraftforge.registries.ForgeRegistries;
 import org.cyclops.cyclopscore.datastructure.Wrapper;
 import org.cyclops.cyclopscore.helper.Helpers;
 
@@ -26,40 +26,42 @@ import java.util.Queue;
  *
  * @author rubensworks
  */
-public class GuiIconExporter extends GuiScreen {
+public class ScreenIconExporter extends Screen {
 
-    private static final int BACKGROUND_COLOR = Helpers.RGBAToInt(1, 0, 0, 255);
+    private static final int BACKGROUND_COLOR = Helpers.RGBAToInt(1, 0, 0, 255); // -16711680
+    private static final int BACKGROUND_COLOR_SHIFTED = -16777215; // For some reason, MC shifts around colors internally... (R seems to be moved from the 16th bit to the 0th bit)
 
     private final int scale;
     private final Queue<IExportTask> exportTasks;
 
-    public GuiIconExporter(int scale) {
+    public ScreenIconExporter(int scale) {
+        super(new TranslationTextComponent("gui.itemexporter.name"));
         this.scale = scale;
         this.exportTasks = this.createExportTasks();
     }
 
     @Override
-    public void drawScreen(int mouseX, int mouseY, float partialTicks) {
-        super.drawScreen(mouseX, mouseY, partialTicks);
+    public void render(int mouseX, int mouseY, float partialTicks) {
+        super.render(mouseX, mouseY, partialTicks);
 
         if (exportTasks.isEmpty()) {
-            Minecraft.getMinecraft().displayGuiScreen(null);
-            Minecraft.getMinecraft().player.sendMessage(new TextComponentTranslation("gui.itemexporter.finished"));
+            Minecraft.getInstance().displayGuiScreen(null);
+            Minecraft.getInstance().player.sendMessage(new TranslationTextComponent("gui.itemexporter.finished"));
         } else {
             IExportTask task = exportTasks.poll();
             try {
                 task.run();
             } catch (IOException e) {
-                Minecraft.getMinecraft().player.sendMessage(new TextComponentTranslation("gui.itemexporter.error"));
+                Minecraft.getInstance().player.sendMessage(new TranslationTextComponent("gui.itemexporter.error"));
                 e.printStackTrace();
-                Minecraft.getMinecraft().displayGuiScreen(null);
+                Minecraft.getInstance().displayGuiScreen(null);
             }
         }
     }
 
     public Queue<IExportTask> createExportTasks() {
         // Initialize our output folder
-        File baseDir = new File(Minecraft.getMinecraft().gameDir, "icon-exports-x" + (this.scale * 2));
+        File baseDir = new File(Minecraft.getInstance().gameDir, "icon-exports-x" + (this.scale * 2));
         baseDir.mkdir();
 
         // Create a list of tasks
@@ -68,32 +70,32 @@ public class GuiIconExporter extends GuiScreen {
         Queue<IExportTask> exportTasks = Queues.newArrayDeque();
 
         // Add fluids
-        for (Map.Entry<String, Fluid> fluidEntry : FluidRegistry.getRegisteredFluids().entrySet()) {
+        for (Map.Entry<ResourceLocation, Fluid> fluidEntry : ForgeRegistries.FLUIDS.getEntries()) {
             tasks.set(tasks.get() + 1);
             String subKey = "fluid:" + fluidEntry.getKey();
             exportTasks.add(() -> {
                 taskProcessed.set(taskProcessed.get() + 1);
                 signalStatus(tasks, taskProcessed);
-                drawRect(0, 0, this.scale, this.scale, BACKGROUND_COLOR);
+                fill(0, 0, this.scale, this.scale, BACKGROUND_COLOR);
                 ItemRenderUtil.renderFluid(this, fluidEntry.getValue(), this.scale);
-                ImageExportUtil.exportImageFromScreenshot(baseDir, subKey, this.width, this.height, this.scale, BACKGROUND_COLOR);
+                ImageExportUtil.exportImageFromScreenshot(baseDir, subKey, this.width, this.height, this.scale, BACKGROUND_COLOR_SHIFTED);
             });
         }
 
         // Add items
-        for (ResourceLocation key : Item.REGISTRY.getKeys()) {
-            Item value = Item.REGISTRY.getObject(key);
+        for (ResourceLocation key : ForgeRegistries.ITEMS.getKeys()) {
+            Item value = ForgeRegistries.ITEMS.getValue(key);
             NonNullList<ItemStack> subItems = NonNullList.create();
-            value.getSubItems(CreativeTabs.SEARCH, subItems);
+            value.fillItemGroup(ItemGroup.SEARCH, subItems);
             for (ItemStack subItem : subItems) {
                 tasks.set(tasks.get() + 1);
-                String subKey = key + ":" + subItem.getMetadata() + (subItem.hasTagCompound() ? "__" + subItem.getTagCompound().toString() : "");
+                String subKey = key + (subItem.hasTag() ? "__" + subItem.getTag().toString() : "");
                 exportTasks.add(() -> {
                     taskProcessed.set(taskProcessed.get() + 1);
                     signalStatus(tasks, taskProcessed);
-                    drawRect(0, 0, this.scale, this.scale, BACKGROUND_COLOR);
+                    fill(0, 0, this.scale, this.scale, BACKGROUND_COLOR);
                     ItemRenderUtil.renderItem(subItem, this.scale);
-                    ImageExportUtil.exportImageFromScreenshot(baseDir, subKey, this.width, this.height, this.scale, BACKGROUND_COLOR);
+                    ImageExportUtil.exportImageFromScreenshot(baseDir, subKey, this.width, this.height, this.scale, BACKGROUND_COLOR_SHIFTED);
                 });
             }
         }
@@ -102,7 +104,7 @@ public class GuiIconExporter extends GuiScreen {
     }
 
     protected void signalStatus(Wrapper<Integer> tasks, Wrapper<Integer> taskProcessed) {
-        Minecraft.getMinecraft().player.sendStatusMessage(new TextComponentTranslation("gui.itemexporter.status", taskProcessed.get(), tasks.get()), true);
+        Minecraft.getInstance().player.sendStatusMessage(new TranslationTextComponent("gui.itemexporter.status", taskProcessed.get(), tasks.get()), true);
     }
 
 }

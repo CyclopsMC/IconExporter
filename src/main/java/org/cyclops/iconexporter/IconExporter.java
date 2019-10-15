@@ -1,146 +1,67 @@
 package org.cyclops.iconexporter;
 
-import com.google.common.collect.Maps;
-import net.minecraft.command.ICommand;
-import net.minecraft.creativetab.CreativeTabs;
+import com.mojang.brigadier.builder.LiteralArgumentBuilder;
+import net.minecraft.command.CommandSource;
+import net.minecraft.item.ItemGroup;
 import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.common.Mod.EventHandler;
-import net.minecraftforge.fml.common.Mod.Instance;
-import net.minecraftforge.fml.common.SidedProxy;
-import net.minecraftforge.fml.common.event.*;
+import net.minecraftforge.fml.loading.FMLEnvironment;
 import org.apache.logging.log4j.Level;
-import org.cyclops.cyclopscore.command.CommandMod;
 import org.cyclops.cyclopscore.config.ConfigHandler;
-import org.cyclops.cyclopscore.config.extendedconfig.ItemConfigReference;
-import org.cyclops.cyclopscore.init.ItemCreativeTab;
 import org.cyclops.cyclopscore.init.ModBaseVersionable;
-import org.cyclops.cyclopscore.init.RecipeHandler;
+import org.cyclops.cyclopscore.proxy.IClientProxy;
 import org.cyclops.cyclopscore.proxy.ICommonProxy;
 import org.cyclops.iconexporter.command.CommandExport;
-
-import java.util.Map;
+import org.cyclops.iconexporter.proxy.ClientProxy;
+import org.cyclops.iconexporter.proxy.CommonProxy;
 
 /**
  * The main mod class of this mod.
  * @author rubensworks (aka kroeserr)
  *
  */
-@Mod(
-        modid = Reference.MOD_ID,
-        name = Reference.MOD_NAME,
-        useMetadata = true,
-        version = Reference.MOD_VERSION,
-        dependencies = Reference.MOD_DEPENDENCIES,
-        guiFactory = "org.cyclops.iconexporter.GuiConfigOverview$ExtendedConfigGuiFactory",
-        certificateFingerprint = Reference.MOD_FINGERPRINT,
-        clientSideOnly = true
-)
-public class IconExporter extends ModBaseVersionable {
-    
-    /**
-     * The proxy of this mod, depending on 'side' a different proxy will be inside this field.
-     * @see SidedProxy
-     */
-    @SidedProxy(clientSide = "org.cyclops.iconexporter.proxy.ClientProxy", serverSide = "org.cyclops.iconexporter.proxy.CommonProxy")
-    public static ICommonProxy proxy;
+@Mod(Reference.MOD_ID)
+public class IconExporter extends ModBaseVersionable<IconExporter> {
     
     /**
      * The unique instance of this mod.
      */
-    @Instance(value = Reference.MOD_ID)
     public static IconExporter _instance;
 
     public IconExporter() {
-        super(Reference.MOD_ID, Reference.MOD_NAME, Reference.MOD_VERSION);
+        super(Reference.MOD_ID, (instance) -> _instance = instance);
     }
 
     @Override
-    protected RecipeHandler constructRecipeHandler() {
-        return new RecipeHandler(this);
+    protected LiteralArgumentBuilder<CommandSource> constructBaseCommand() {
+        LiteralArgumentBuilder<CommandSource> root = super.constructBaseCommand();
+
+        if (FMLEnvironment.dist.isClient()) {
+            root.then(CommandExport.make());
+        }
+
+        return root;
     }
 
     @Override
-    protected ICommand constructBaseCommand() {
-        Map<String, ICommand> commands = Maps.newHashMap();
-        commands.put(CommandExport.NAME, new CommandExport(this));
-        return new CommandMod(this, commands);
-    }
-
-    /**
-     * The pre-initialization, will register required configs.
-     * @param event The Forge event required for this.
-     */
-    @EventHandler
-    @Override
-    public void preInit(FMLPreInitializationEvent event) {
-        super.preInit(event);
-    }
-    
-    /**
-     * Register the config dependent things like world generation and proxy handlers.
-     * @param event The Forge event required for this.
-     */
-    @EventHandler
-    @Override
-    public void init(FMLInitializationEvent event) {
-        super.init(event);
-    }
-    
-    /**
-     * Register the event hooks.
-     * @param event The Forge event required for this.
-     */
-    @EventHandler
-    @Override
-    public void postInit(FMLPostInitializationEvent event) {
-        super.postInit(event);
-    }
-    
-    /**
-     * Register the things that are related to server starting, like commands.
-     * @param event The Forge event required for this.
-     */
-    @EventHandler
-    @Override
-    public void onServerStarting(FMLServerStartingEvent event) {
-        super.onServerStarting(event);
-    }
-
-    /**
-     * Register the things that are related to server starting.
-     * @param event The Forge event required for this.
-     */
-    @EventHandler
-    @Override
-    public void onServerStarted(FMLServerStartedEvent event) {
-        super.onServerStarted(event);
-    }
-
-    /**
-     * Register the things that are related to server stopping, like persistent storage.
-     * @param event The Forge event required for this.
-     */
-    @EventHandler
-    @Override
-    public void onServerStopping(FMLServerStoppingEvent event) {
-        super.onServerStopping(event);
+    protected IClientProxy constructClientProxy() {
+        return new ClientProxy();
     }
 
     @Override
-    public CreativeTabs constructDefaultCreativeTab() {
-        // Uncomment the following line and specify an item config class to add a creative tab
-        // return new ItemCreativeTab(this, new ItemConfigReference(ITEM CONFIG CLASS));
+    protected ICommonProxy constructCommonProxy() {
+        return new CommonProxy();
+    }
+
+    @Override
+    protected ItemGroup constructDefaultItemGroup() {
         return null;
     }
 
     @Override
-    public void onGeneralConfigsRegister(ConfigHandler configHandler) {
-        configHandler.add(new GeneralConfig());
-    }
+    protected void onConfigsRegister(ConfigHandler configHandler) {
+        super.onConfigsRegister(configHandler);
 
-    @Override
-    public ICommonProxy getProxy() {
-        return proxy;
+        configHandler.addConfigurable(new GeneralConfig());
     }
 
     /**

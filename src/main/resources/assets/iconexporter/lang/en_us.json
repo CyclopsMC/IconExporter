@@ -1,0 +1,7 @@
+{
+  "_comment": "General",
+  "gui.itemexporter.name": "Icon Exporter",
+  "gui.itemexporter.finished": "Finished exporting",
+  "gui.itemexporter.error": "Error while exporting",
+  "gui.itemexporter.status": "Rendering %s / %s"
+}

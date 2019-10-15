@@ -1,50 +1,49 @@
 package org.cyclops.iconexporter.command;
 
+import com.mojang.brigadier.Command;
+import com.mojang.brigadier.arguments.IntegerArgumentType;
+import com.mojang.brigadier.builder.LiteralArgumentBuilder;
+import com.mojang.brigadier.context.CommandContext;
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.minecraft.client.Minecraft;
-import net.minecraft.command.ICommandSender;
-import net.minecraft.server.MinecraftServer;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.text.TextComponentString;
-import org.cyclops.cyclopscore.command.CommandMod;
-import org.cyclops.cyclopscore.init.ModBase;
+import net.minecraft.command.CommandSource;
+import net.minecraft.command.Commands;
 import org.cyclops.iconexporter.GeneralConfig;
-import org.cyclops.iconexporter.client.gui.GuiIconExporter;
-
-import java.util.List;
+import org.cyclops.iconexporter.client.gui.ScreenIconExporter;
 
 /**
  * A command to initiate the exporting process.
  * @author rubensworks
  *
  */
-public class CommandExport extends CommandMod {
+public class CommandExport implements Command<CommandSource> {
 
-    public static final String NAME = "export";
+    private final boolean param;
 
-    public CommandExport(ModBase mod) {
-        super(mod, NAME);
+    public CommandExport(boolean param) {
+        this.param = param;
     }
 
     @Override
-    public List<String> getTabCompletions(MinecraftServer server, ICommandSender sender, String[] parts, BlockPos blockPos) {
-        return null;
-    }
-
-    @Override
-    public void execute(MinecraftServer server, ICommandSender sender, String[] parts) {
+    public int run(CommandContext<CommandSource> context) throws CommandSyntaxException {
         // Determine the scale
         int scale = GeneralConfig.defaultScale;
-        if (parts.length > 0) {
-            try {
-                scale = Integer.parseInt(parts[0]);
-            } catch (NumberFormatException e) {
-                e.printStackTrace();
-            }
+        if (param) {
+            scale = context.getArgument("scale", Integer.class);
         }
 
         // Open the gui that will render the icons
-        GuiIconExporter exporter = new GuiIconExporter(scale / 2);
-        Minecraft.getMinecraft().addScheduledTask(() -> Minecraft.getMinecraft().displayGuiScreen(exporter));
+        ScreenIconExporter exporter = new ScreenIconExporter(scale / 2);
+        Minecraft.getInstance().deferTask(() -> Minecraft.getInstance().displayGuiScreen(exporter));
+
+        return 0;
+    }
+
+    public static LiteralArgumentBuilder<CommandSource> make() {
+        return Commands.literal("export")
+                .executes(new CommandExport(false))
+                .then(Commands.argument("scale", IntegerArgumentType.integer(1))
+                        .executes(new CommandExport(true)));
     }
 
 }

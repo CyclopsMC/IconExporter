@@ -52,7 +52,6 @@ public class GuiIconExporter extends GuiScreen {
             } catch (IOException e) {
                 Minecraft.getMinecraft().player.sendMessage(new TextComponentTranslation("gui.itemexporter.error"));
                 e.printStackTrace();
-                Minecraft.getMinecraft().displayGuiScreen(null);
             }
         }
     }

@@ -1,10 +1,13 @@
 package org.cyclops.iconexporter.client.gui;
 
+import com.google.common.base.Charsets;
 import com.mojang.blaze3d.platform.GLX;
 import com.mojang.blaze3d.platform.GlStateManager;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.texture.NativeImage;
 import net.minecraft.client.shader.Framebuffer;
+import net.minecraft.nbt.INBT;
+import org.apache.commons.io.FileUtils;
 import org.apache.logging.log4j.Level;
 import org.cyclops.iconexporter.IconExporter;
 import org.lwjgl.system.MemoryUtil;
@@ -52,6 +55,23 @@ public class ImageExportUtil {
             }
         } catch (IOException e) {
             IconExporter.clog(Level.ERROR, "Error while writing the PNG image for key " + key);
+            throw e;
+        }
+    }
+
+    public static void exportNbtFile(File dir, String key, INBT tag) throws IOException {
+        // Write the file
+        key = key.replaceAll(":", "__");
+        try {
+            File file = new File(dir, key + ".txt").getCanonicalFile();
+            try {
+                FileUtils.writeStringToFile(file, tag.toString(), Charsets.UTF_8);
+            } catch (NullPointerException e) {
+                e.printStackTrace();
+                throw new IOException("Error while writing the TXT image " + file);
+            }
+        } catch (IOException e) {
+            IconExporter.clog(Level.ERROR, "Error while writing the TXT image for key " + key);
             throw e;
         }
     }

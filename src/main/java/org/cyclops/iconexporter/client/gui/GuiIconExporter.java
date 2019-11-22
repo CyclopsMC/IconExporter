@@ -6,13 +6,16 @@ import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.NonNullList;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraftforge.fluids.Fluid;
 import net.minecraftforge.fluids.FluidRegistry;
+import org.apache.commons.codec.digest.DigestUtils;
 import org.cyclops.cyclopscore.datastructure.Wrapper;
 import org.cyclops.cyclopscore.helper.Helpers;
+import org.cyclops.iconexporter.GeneralConfig;
 
 import java.io.File;
 import java.io.IOException;
@@ -56,6 +59,14 @@ public class GuiIconExporter extends GuiScreen {
         }
     }
 
+    public String serializeNbtTag(NBTTagCompound tag) {
+        if (GeneralConfig.fileNameHashTag) {
+            return DigestUtils.md5Hex(tag.toString());
+        } else {
+            return tag.toString();
+        }
+    }
+
     public Queue<IExportTask> createExportTasks() {
         // Initialize our output folder
         File baseDir = new File(Minecraft.getMinecraft().gameDir, "icon-exports-x" + (this.scale * 2));
@@ -86,13 +97,16 @@ public class GuiIconExporter extends GuiScreen {
             value.getSubItems(CreativeTabs.SEARCH, subItems);
             for (ItemStack subItem : subItems) {
                 tasks.set(tasks.get() + 1);
-                String subKey = key + ":" + subItem.getMetadata() + (subItem.hasTagCompound() ? "__" + subItem.getTagCompound().toString() : "");
+                String subKey = key + ":" + subItem.getMetadata() + (subItem.hasTagCompound() ? "__" + serializeNbtTag(subItem.getTagCompound()) : "");
                 exportTasks.add(() -> {
                     taskProcessed.set(taskProcessed.get() + 1);
                     signalStatus(tasks, taskProcessed);
                     drawRect(0, 0, this.scale, this.scale, BACKGROUND_COLOR);
                     ItemRenderUtil.renderItem(subItem, this.scale);
                     ImageExportUtil.exportImageFromScreenshot(baseDir, subKey, this.width, this.height, this.scale, BACKGROUND_COLOR);
+                    if (subItem.hasTagCompound() && GeneralConfig.fileNameHashTag) {
+                        ImageExportUtil.exportNbtFile(baseDir, subKey, subItem.getTagCompound());
+                    }
                 });
             }
         }

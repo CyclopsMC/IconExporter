@@ -59,6 +59,12 @@ public class GeneralConfig extends DummyConfig {
     public static int defaultScale = 32;
 
     /**
+     * If the NBT tag should be hashed with MD5 when constructing the file name, and if an auxiliary txt file should be created with the full tag contents.
+     */
+    @ConfigurableProperty(category = ConfigurableTypeCategory.CORE, comment = "If the NBT tag should be hashed with MD5 when constructing the file name, and if an auxiliary txt file should be created with the full tag contents.", isCommandable = true)
+    public static boolean fileNameHashTag = false;
+
+    /**
      * The type of this config.
      */
     public static ConfigurableType TYPE = ConfigurableType.DUMMY;

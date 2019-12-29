@@ -44,7 +44,9 @@ public class ImageExportUtil {
         }
 
         // Write the file
-        key = key.replaceAll(":", "__");
+        key = key
+                .replaceAll(":", "__")
+                .replaceAll("\"", "'");
         try {
             File file = new File(dir, key + ".png").getCanonicalFile();
             try {

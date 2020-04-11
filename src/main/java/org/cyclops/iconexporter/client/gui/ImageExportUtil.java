@@ -1,12 +1,10 @@
 package org.cyclops.iconexporter.client.gui;
 
 import com.google.common.base.Charsets;
-import com.mojang.blaze3d.platform.GLX;
-import com.mojang.blaze3d.platform.GlStateManager;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.texture.NativeImage;
-import net.minecraft.client.shader.Framebuffer;
 import net.minecraft.nbt.INBT;
+import net.minecraft.util.ScreenShotHelper;
 import org.apache.commons.io.FileUtils;
 import org.apache.logging.log4j.Level;
 import org.cyclops.iconexporter.IconExporter;
@@ -23,7 +21,7 @@ public class ImageExportUtil {
 
     public static void exportImageFromScreenshot(File dir, String key, int guiWidth, int guiHeight, int scale, int backgroundColor) throws IOException {
         // Take a screenshot
-        NativeImage image = createScreenshot(guiWidth, guiHeight, Minecraft.getInstance().getFramebuffer());
+        NativeImage image = ScreenShotHelper.createScreenshot(guiWidth, guiHeight, Minecraft.getInstance().getFramebuffer());
         float imageScale = image.getWidth() / guiWidth;
         image = getSubImage(image, (int) (scale * imageScale), (int) (scale * imageScale));
 
@@ -89,25 +87,6 @@ public class ImageExportUtil {
         }
 
         return imageNew;
-    }
-
-    // Adapted from net.minecraft.util.ScreenShotHelper to create buffered images with alpha
-    public static NativeImage createScreenshot(int width, int height, Framebuffer framebufferIn) {
-        if (GLX.isUsingFBOs()) {
-            width = framebufferIn.framebufferTextureWidth;
-            height = framebufferIn.framebufferTextureHeight;
-        }
-
-        NativeImage nativeimage = new NativeImage(width, height, false);
-        if (GLX.isUsingFBOs()) {
-            GlStateManager.bindTexture(framebufferIn.framebufferTexture);
-            nativeimage.downloadFromTexture(0, true);
-        } else {
-            nativeimage.downloadFromFramebuffer(true);
-        }
-
-        nativeimage.flip();
-        return nativeimage;
     }
 
 }

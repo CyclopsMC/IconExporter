@@ -2,12 +2,12 @@ package org.cyclops.iconexporter.client.gui;
 
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
-import net.minecraft.client.renderer.Matrix4f;
 import net.minecraft.client.renderer.RenderHelper;
-import net.minecraft.client.renderer.Vector3f;
-import net.minecraft.client.renderer.Vector4f;
 import net.minecraft.util.Util;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.util.math.vector.Matrix4f;
+import net.minecraft.util.math.vector.Vector3d;
+import net.minecraft.util.math.vector.Vector3f;
+import net.minecraft.util.math.vector.Vector4f;
 
 /**
  * The same as {@link RenderHelper#enableStandardItemLighting()},
@@ -21,8 +21,8 @@ import net.minecraft.util.math.Vec3d;
  */
 public class ItemLightingUtil {
 
-    private static final Vec3d LIGHT0_POS = (new Vec3d(0.20000000298023224D, 1.0D, -0.699999988079071D)).normalize();
-    private static final Vec3d LIGHT1_POS = (new Vec3d(-0.20000000298023224D, 1.0D, 0.699999988079071D)).normalize();
+    private static final Vector3d LIGHT0_POS = (new Vector3d(0.20000000298023224D, 1.0D, -0.699999988079071D)).normalize();
+    private static final Vector3d LIGHT1_POS = (new Vector3d(-0.20000000298023224D, 1.0D, 0.699999988079071D)).normalize();
     private static final Vector3f DIFFUSE_LIGHT_0 = Util.make(new Vector3f(0.2F, 1.0F, -0.7F), Vector3f::normalize);
     private static final Vector3f DIFFUSE_LIGHT_1 = Util.make(new Vector3f(-0.2F, 1.0F, 0.7F), Vector3f::normalize);
 

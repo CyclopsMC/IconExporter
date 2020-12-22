@@ -1,5 +1,7 @@
 package org.cyclops.iconexporter.client.gui;
 
+import com.mojang.blaze3d.matrix.MatrixStack;
+
 import java.io.IOException;
 
 /**
@@ -7,6 +9,6 @@ import java.io.IOException;
  */
 public interface IExportTask {
 
-    public void run() throws IOException;
+    public void run(MatrixStack matrixStack) throws IOException;
 
 }

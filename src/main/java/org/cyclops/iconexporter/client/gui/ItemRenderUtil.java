@@ -61,10 +61,10 @@ public class ItemRenderUtil {
         RenderHelper.disableStandardItemLighting();
     }
 
-    public static void renderFluid(AbstractGui gui, Fluid fluid, int scale) {
+    public static void renderFluid(AbstractGui gui, MatrixStack matrixStack, Fluid fluid, int scale) {
         GlStateManager.scalef(scale / 16, scale / 16, scale / 16);
         ItemLightingUtil.enableGUIStandardItemLighting(scale);
-        GuiHelpers.renderFluidSlot(gui, new FluidStack(fluid, FluidHelpers.BUCKET_VOLUME), 0, 0);
+        GuiHelpers.renderFluidSlot(gui, matrixStack, new FluidStack(fluid, FluidHelpers.BUCKET_VOLUME), 0, 0);
     }
 
     // ----- Everything below is modified from RenderItem -----
@@ -118,7 +118,7 @@ public class ItemRenderUtil {
         RenderSystem.scalef(16.0F, 16.0F, 16.0F);
         MatrixStack matrixstack = new MatrixStack();
         IRenderTypeBuffer.Impl irendertypebuffer$impl = Minecraft.getInstance().getRenderTypeBuffers().getBufferSource();
-        boolean flag = !bakedmodel.func_230044_c_();
+        boolean flag = !bakedmodel.isSideLit();
         if (flag) {
             ItemLightingUtil.setupGuiFlatDiffuseLighting(scale);
         }

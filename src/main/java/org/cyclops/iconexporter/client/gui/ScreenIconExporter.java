@@ -1,6 +1,7 @@
 package org.cyclops.iconexporter.client.gui;
 
 import com.google.common.collect.Queues;
+import com.mojang.blaze3d.matrix.MatrixStack;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.fluid.Fluid;
@@ -9,7 +10,9 @@ import net.minecraft.item.ItemGroup;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.INBT;
 import net.minecraft.util.NonNullList;
+import net.minecraft.util.RegistryKey;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.Util;
 import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraftforge.registries.ForgeRegistries;
 import org.apache.commons.codec.digest.DigestUtils;
@@ -44,18 +47,18 @@ public class ScreenIconExporter extends Screen {
     }
 
     @Override
-    public void render(int mouseX, int mouseY, float partialTicks) {
-        super.render(mouseX, mouseY, partialTicks);
+    public void render(MatrixStack matrixStack, int mouseX, int mouseY, float partialTicks) {
+        super.render(matrixStack, mouseX, mouseY, partialTicks);
 
         if (exportTasks.isEmpty()) {
             Minecraft.getInstance().displayGuiScreen(null);
-            Minecraft.getInstance().player.sendMessage(new TranslationTextComponent("gui.itemexporter.finished"));
+            Minecraft.getInstance().player.sendMessage(new TranslationTextComponent("gui.itemexporter.finished"), Util.DUMMY_UUID);
         } else {
             IExportTask task = exportTasks.poll();
             try {
-                task.run();
+                task.run(matrixStack);
             } catch (IOException e) {
-                Minecraft.getInstance().player.sendMessage(new TranslationTextComponent("gui.itemexporter.error"));
+                Minecraft.getInstance().player.sendMessage(new TranslationTextComponent("gui.itemexporter.error"), Util.DUMMY_UUID);
                 e.printStackTrace();
             }
         }
@@ -80,14 +83,14 @@ public class ScreenIconExporter extends Screen {
         Queue<IExportTask> exportTasks = Queues.newArrayDeque();
 
         // Add fluids
-        for (Map.Entry<ResourceLocation, Fluid> fluidEntry : ForgeRegistries.FLUIDS.getEntries()) {
+        for (Map.Entry<RegistryKey<Fluid>, Fluid> fluidEntry : ForgeRegistries.FLUIDS.getEntries()) {
             tasks.set(tasks.get() + 1);
-            String subKey = "fluid:" + fluidEntry.getKey();
-            exportTasks.add(() -> {
+            String subKey = "fluid:" + fluidEntry.getKey().getLocation();
+            exportTasks.add((matrixStack) -> {
                 taskProcessed.set(taskProcessed.get() + 1);
                 signalStatus(tasks, taskProcessed);
-                fill(0, 0, this.scale, this.scale, BACKGROUND_COLOR);
-                ItemRenderUtil.renderFluid(this, fluidEntry.getValue(), this.scale);
+                fill(matrixStack, 0, 0, this.scale, this.scale, BACKGROUND_COLOR);
+                ItemRenderUtil.renderFluid(this, matrixStack, fluidEntry.getValue(), this.scale);
                 ImageExportUtil.exportImageFromScreenshot(baseDir, subKey, this.width, this.height, this.scale, BACKGROUND_COLOR_SHIFTED);
             });
         }
@@ -100,10 +103,10 @@ public class ScreenIconExporter extends Screen {
             for (ItemStack subItem : subItems) {
                 tasks.set(tasks.get() + 1);
                 String subKey = key + (subItem.hasTag() ? "__" + serializeNbtTag(subItem.getTag()) : "");
-                exportTasks.add(() -> {
+                exportTasks.add((matrixStack) -> {
                     taskProcessed.set(taskProcessed.get() + 1);
                     signalStatus(tasks, taskProcessed);
-                    fill(0, 0, this.scale, this.scale, BACKGROUND_COLOR);
+                    fill(matrixStack, 0, 0, this.scale, this.scale, BACKGROUND_COLOR);
                     ItemRenderUtil.renderItem(subItem, this.scale);
                     ImageExportUtil.exportImageFromScreenshot(baseDir, subKey, this.width, this.height, this.scale, BACKGROUND_COLOR_SHIFTED);
                     if (subItem.hasTag() && GeneralConfig.fileNameHashTag) {

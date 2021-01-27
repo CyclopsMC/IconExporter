@@ -10,6 +10,7 @@ authors="rubensworks (aka kroeser)"
 modId="iconexporter"
 version="${file.jarVersion}"
 displayName="IconExporter"
+updateJSONURL="https://raw.githubusercontent.com/CyclopsMC/Versions/master/forge_update/iconexporter.json"
 description='''
 Exports item and block icons to files.
 '''

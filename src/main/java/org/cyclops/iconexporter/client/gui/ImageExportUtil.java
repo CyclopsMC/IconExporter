@@ -19,11 +19,10 @@ import java.io.IOException;
  */
 public class ImageExportUtil {
 
-    public static void exportImageFromScreenshot(File dir, String key, int guiWidth, int guiHeight, int scale, int backgroundColor) throws IOException {
+    public static void exportImageFromScreenshot(File dir, String key, int guiWidth, int guiHeight, int scaleImage, int backgroundColor) throws IOException {
         // Take a screenshot
         NativeImage image = ScreenShotHelper.createScreenshot(guiWidth, guiHeight, Minecraft.getInstance().getFramebuffer());
-        float imageScale = image.getWidth() / guiWidth;
-        image = getSubImage(image, (int) (scale * imageScale), (int) (scale * imageScale));
+        image = getSubImage(image, scaleImage, scaleImage);
 
         // Convert our background color to a fully transparent pixel
         byte alpha = (byte) 256;

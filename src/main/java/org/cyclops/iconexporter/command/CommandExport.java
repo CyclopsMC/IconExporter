@@ -33,7 +33,7 @@ public class CommandExport implements Command<CommandSource> {
         }
 
         // Open the gui that will render the icons
-        ScreenIconExporter exporter = new ScreenIconExporter(scale / 2);
+        ScreenIconExporter exporter = new ScreenIconExporter(scale, Minecraft.getInstance().getMainWindow().getGuiScaleFactor());
         Minecraft.getInstance().deferTask(() -> Minecraft.getInstance().displayGuiScreen(exporter));
 
         return 0;

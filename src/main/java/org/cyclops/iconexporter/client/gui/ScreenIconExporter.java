@@ -2,6 +2,7 @@ package org.cyclops.iconexporter.client.gui;
 
 import com.google.common.collect.Queues;
 import com.mojang.blaze3d.matrix.MatrixStack;
+import com.sun.scenario.effect.impl.sw.sse.SSEBlend_SRC_OUTPeer;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.fluid.Fluid;
@@ -37,12 +38,14 @@ public class ScreenIconExporter extends Screen {
     private static final int BACKGROUND_COLOR = Helpers.RGBAToInt(1, 0, 0, 255); // -16711680
     private static final int BACKGROUND_COLOR_SHIFTED = -16777215; // For some reason, MC shifts around colors internally... (R seems to be moved from the 16th bit to the 0th bit)
 
-    private final int scale;
+    private final int scaleImage;
+    private final double scaleGui;
     private final Queue<IExportTask> exportTasks;
 
-    public ScreenIconExporter(int scale) {
+    public ScreenIconExporter(int scaleImage, double scaleGui) {
         super(new TranslationTextComponent("gui.itemexporter.name"));
-        this.scale = scale;
+        this.scaleImage = scaleImage;
+        this.scaleGui = scaleGui;
         this.exportTasks = this.createExportTasks();
     }
 
@@ -73,8 +76,11 @@ public class ScreenIconExporter extends Screen {
     }
 
     public Queue<IExportTask> createExportTasks() {
+        float scaleModified = (float) (this.scaleImage / this.scaleGui);
+        int scaleModifiedRounded = (int) Math.ceil(scaleModified);
+
         // Initialize our output folder
-        File baseDir = new File(Minecraft.getInstance().gameDir, "icon-exports-x" + (this.scale * 2));
+        File baseDir = new File(Minecraft.getInstance().gameDir, "icon-exports-x" + this.scaleImage);
         baseDir.mkdir();
 
         // Create a list of tasks
@@ -89,9 +95,9 @@ public class ScreenIconExporter extends Screen {
             exportTasks.add((matrixStack) -> {
                 taskProcessed.set(taskProcessed.get() + 1);
                 signalStatus(tasks, taskProcessed);
-                fill(matrixStack, 0, 0, this.scale, this.scale, BACKGROUND_COLOR);
-                ItemRenderUtil.renderFluid(this, matrixStack, fluidEntry.getValue(), this.scale);
-                ImageExportUtil.exportImageFromScreenshot(baseDir, subKey, this.width, this.height, this.scale, BACKGROUND_COLOR_SHIFTED);
+                fill(matrixStack, 0, 0, scaleModifiedRounded, scaleModifiedRounded, BACKGROUND_COLOR);
+                ItemRenderUtil.renderFluid(this, matrixStack, fluidEntry.getValue(), scaleModified);
+                ImageExportUtil.exportImageFromScreenshot(baseDir, subKey, this.width, this.height, this.scaleImage, BACKGROUND_COLOR_SHIFTED);
             });
         }
 
@@ -106,9 +112,9 @@ public class ScreenIconExporter extends Screen {
                 exportTasks.add((matrixStack) -> {
                     taskProcessed.set(taskProcessed.get() + 1);
                     signalStatus(tasks, taskProcessed);
-                    fill(matrixStack, 0, 0, this.scale, this.scale, BACKGROUND_COLOR);
-                    ItemRenderUtil.renderItem(subItem, this.scale);
-                    ImageExportUtil.exportImageFromScreenshot(baseDir, subKey, this.width, this.height, this.scale, BACKGROUND_COLOR_SHIFTED);
+                    fill(matrixStack, 0, 0, scaleModifiedRounded, scaleModifiedRounded, BACKGROUND_COLOR);
+                    ItemRenderUtil.renderItem(subItem, scaleModified);
+                    ImageExportUtil.exportImageFromScreenshot(baseDir, subKey, this.width, this.height, this.scaleImage, BACKGROUND_COLOR_SHIFTED);
                     if (subItem.hasTag() && GeneralConfig.fileNameHashTag) {
                         ImageExportUtil.exportNbtFile(baseDir, subKey, subItem.getTag());
                     }

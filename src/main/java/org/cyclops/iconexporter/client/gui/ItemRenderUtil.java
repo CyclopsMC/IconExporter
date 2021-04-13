@@ -6,7 +6,6 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.AbstractGui;
 import net.minecraft.client.renderer.IRenderTypeBuffer;
-import net.minecraft.client.renderer.ItemRenderer;
 import net.minecraft.client.renderer.RenderHelper;
 import net.minecraft.client.renderer.model.IBakedModel;
 import net.minecraft.client.renderer.model.ItemCameraTransforms;
@@ -22,7 +21,6 @@ import net.minecraft.world.World;
 import net.minecraftforge.fluids.FluidStack;
 import org.cyclops.cyclopscore.helper.FluidHelpers;
 import org.cyclops.cyclopscore.helper.GuiHelpers;
-import org.cyclops.cyclopscore.helper.Helpers;
 
 import javax.annotation.Nullable;
 
@@ -32,7 +30,7 @@ import javax.annotation.Nullable;
  */
 public class ItemRenderUtil {
 
-    public static void renderItem(ItemStack itemStack, int scale) {
+    public static void renderItem(ItemStack itemStack, float scale) {
         // Based on Integrated Dynamics's ItemValueTypeWorldRenderer
         RenderSystem.scalef(scale, scale, scale);
         RenderSystem.pushMatrix();
@@ -61,8 +59,8 @@ public class ItemRenderUtil {
         RenderHelper.disableStandardItemLighting();
     }
 
-    public static void renderFluid(AbstractGui gui, MatrixStack matrixStack, Fluid fluid, int scale) {
-        GlStateManager.scalef(scale / 16, scale / 16, scale / 16);
+    public static void renderFluid(AbstractGui gui, MatrixStack matrixStack, Fluid fluid, float scale) {
+        GlStateManager.scaled(scale / 16, scale / 16, scale / 16);
         ItemLightingUtil.enableGUIStandardItemLighting(scale);
         GuiHelpers.renderFluidSlot(gui, matrixStack, new FluidStack(fluid, FluidHelpers.BUCKET_VOLUME), 0, 0);
     }

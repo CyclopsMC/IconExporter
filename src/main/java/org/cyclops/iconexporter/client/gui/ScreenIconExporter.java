@@ -2,7 +2,6 @@ package org.cyclops.iconexporter.client.gui;
 
 import com.google.common.collect.Queues;
 import com.mojang.blaze3d.matrix.MatrixStack;
-import com.sun.scenario.effect.impl.sw.sse.SSEBlend_SRC_OUTPeer;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.fluid.Fluid;

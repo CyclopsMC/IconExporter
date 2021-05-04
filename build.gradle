@@ -65,7 +65,11 @@ repositories {
 	mavenLocal()
     maven {
         name "Cyclops Repo"
-        url "https://oss.jfrog.org/artifactory/simple/libs-release/"
+        url "https://maven.pkg.github.com/CyclopsMC/packages"
+        credentials {
+            username = project.findProperty("gpr.user") ?: System.getenv("MAVEN_USERNAME")
+            password = project.findProperty("gpr.key") ?: System.getenv("MAVEN_KEY")
+        }
     }
 }
 
@@ -74,9 +78,9 @@ dependencies {
 
     // Add something like 'cyclopscore_version_local=0.1.0-DEV' to your gradle.properties if you want to use a custom local CyclopsCore version.
     if(project.hasProperty("cyclopscore_version_local")) {
-        compile "org.cyclops.cyclopscore:CyclopsCore:${config.minecraft_version}-${project.cyclopscore_version_local}:deobf"
+        compile "org.cyclops.cyclopscore:cyclopscore:${config.minecraft_version}-${project.cyclopscore_version_local}:deobf"
     } else {
-        compile "org.cyclops.cyclopscore:CyclopsCore:${config.minecraft_version}-${config.cyclopscore_version}:deobf"
+        compile "org.cyclops.cyclopscore:cyclopscore:${config.minecraft_version}-${config.cyclopscore_version}:deobf"
     }
 
     // Project lombok
@@ -258,7 +262,7 @@ uploadArchives {
         pom {
             groupId = project.group
             version = project.version
-            artifactId = project.archivesBaseName
+            artifactId = project.archivesBaseName.toLowerCase()
         }
         pom.project {
             name project.archivesBaseName

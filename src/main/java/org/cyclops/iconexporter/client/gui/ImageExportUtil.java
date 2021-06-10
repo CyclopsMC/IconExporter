@@ -55,6 +55,8 @@ public class ImageExportUtil {
         } catch (IOException e) {
             IconExporter.clog(Level.ERROR, "Error while writing the PNG image for key " + key);
             throw e;
+        } finally {
+            image.close();
         }
     }
 

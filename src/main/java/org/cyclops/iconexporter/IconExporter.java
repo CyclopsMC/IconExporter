@@ -1,8 +1,8 @@
 package org.cyclops.iconexporter;
 
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
-import net.minecraft.command.CommandSource;
-import net.minecraft.item.ItemGroup;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.world.item.CreativeModeTab;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.loading.FMLEnvironment;
 import org.apache.logging.log4j.Level;
@@ -32,8 +32,8 @@ public class IconExporter extends ModBaseVersionable<IconExporter> {
     }
 
     @Override
-    protected LiteralArgumentBuilder<CommandSource> constructBaseCommand() {
-        LiteralArgumentBuilder<CommandSource> root = super.constructBaseCommand();
+    protected LiteralArgumentBuilder<CommandSourceStack> constructBaseCommand() {
+        LiteralArgumentBuilder<CommandSourceStack> root = super.constructBaseCommand();
 
         if (FMLEnvironment.dist.isClient()) {
             root.then(CommandExport.make());
@@ -53,7 +53,7 @@ public class IconExporter extends ModBaseVersionable<IconExporter> {
     }
 
     @Override
-    protected ItemGroup constructDefaultItemGroup() {
+    protected CreativeModeTab constructDefaultCreativeModeTab() {
         return null;
     }
 

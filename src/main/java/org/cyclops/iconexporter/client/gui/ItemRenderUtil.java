@@ -1,26 +1,28 @@
 package org.cyclops.iconexporter.client.gui;
 
-import com.mojang.blaze3d.matrix.MatrixStack;
+import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.math.Vector3f;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.AbstractGui;
-import net.minecraft.client.renderer.IRenderTypeBuffer;
-import net.minecraft.client.renderer.RenderHelper;
-import net.minecraft.client.renderer.model.IBakedModel;
-import net.minecraft.client.renderer.model.ItemCameraTransforms;
-import net.minecraft.client.renderer.texture.AtlasTexture;
+import net.minecraft.client.gui.GuiComponent;
+import net.minecraft.client.renderer.MultiBufferSource;
+import com.mojang.blaze3d.platform.Lighting;
+import net.minecraft.client.resources.model.BakedModel;
+import net.minecraft.client.renderer.block.model.ItemTransforms;
+import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.client.renderer.texture.OverlayTexture;
-import net.minecraft.crash.CrashReport;
-import net.minecraft.crash.CrashReportCategory;
-import net.minecraft.crash.ReportedException;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.fluid.Fluid;
-import net.minecraft.item.ItemStack;
-import net.minecraft.world.World;
+import net.minecraft.CrashReport;
+import net.minecraft.CrashReportCategory;
+import net.minecraft.ReportedException;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.level.material.Fluid;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.Level;
 import net.minecraftforge.fluids.FluidStack;
 import org.cyclops.cyclopscore.helper.FluidHelpers;
 import org.cyclops.cyclopscore.helper.GuiHelpers;
+import org.cyclops.cyclopscore.helper.RenderHelpers;
 
 import javax.annotation.Nullable;
 
@@ -30,53 +32,29 @@ import javax.annotation.Nullable;
  */
 public class ItemRenderUtil {
 
-    public static void renderItem(ItemStack itemStack, float scale) {
+    public static void renderItem(PoseStack poseStack, ItemStack itemStack, float scale) {
         // Based on Integrated Dynamics's ItemValueTypeWorldRenderer
-        RenderSystem.scalef(scale, scale, scale);
-        RenderSystem.pushMatrix();
-        RenderSystem.scaled(0.0625, 0.0625, 0.01);
-        ItemLightingUtil.enableGUIStandardItemLighting(scale);
-
-        RenderSystem.pushMatrix();
-        RenderSystem.rotatef(40f, 0.0F, 1.0F, 0.0F);
-        RenderSystem.rotatef(95F, 1.0F, 0.0F, 0.0F);
-        RenderSystem.popMatrix();
-
-        RenderSystem.enablePolygonOffset();
-        RenderSystem.polygonOffset(-1, -1);
-
-        RenderSystem.pushTextureAttributes();
-        RenderSystem.enableRescaleNormal();
-        RenderSystem.popAttributes();
-
-        renderItemAndEffectIntoGUI(itemStack, 0, 0, scale);
-        RenderSystem.disableBlend();
-        RenderSystem.enableAlphaTest();
-
-        RenderSystem.disablePolygonOffset();
-
-        RenderSystem.popMatrix();
-        RenderHelper.turnOff();
+        renderGuiItem(itemStack, 0, 0, scale);
+        Lighting.setupFor3DItems();
     }
 
-    public static void renderFluid(AbstractGui gui, MatrixStack matrixStack, Fluid fluid, float scale) {
-        GlStateManager._scaled(scale / 16, scale / 16, scale / 16);
-        ItemLightingUtil.enableGUIStandardItemLighting(scale);
+    public static void renderFluid(GuiComponent gui, PoseStack matrixStack, Fluid fluid, float scale) {
+        matrixStack.scale(scale / 16, scale / 16, scale / 16);
         GuiHelpers.renderFluidSlot(gui, matrixStack, new FluidStack(fluid, FluidHelpers.BUCKET_VOLUME), 0, 0);
     }
 
-    // ----- Everything below is modified from RenderItem -----
+    // ----- Everything below is modified from ItemRenderer#renderGuiItem -----
 
-    public static void renderItemAndEffectIntoGUI(ItemStack stack, int xPosition, int yPosition, float scale) {
-        renderItemAndEffectIntoGUI(Minecraft.getInstance().player, stack, xPosition, yPosition, scale);
+    public static void renderGuiItem(ItemStack stack, int xPosition, int yPosition, float scale) {
+        renderGuiItem(Minecraft.getInstance().player, stack, xPosition, yPosition, scale);
     }
 
-    public static void renderItemAndEffectIntoGUI(@Nullable LivingEntity entityIn, ItemStack itemIn, int x, int y, float scale) {
+    public static void renderGuiItem(@Nullable LivingEntity entityIn, ItemStack itemIn, int x, int y, float scale) {
         if (!itemIn.isEmpty()) {
             Minecraft.getInstance().getItemRenderer().blitOffset += 50.0F;
 
             try {
-                renderItemModelIntoGUI(itemIn, x, y, Minecraft.getInstance().getItemRenderer().getModel(itemIn, (World)null, entityIn), scale);
+                renderItemModelIntoGUI(itemIn, x, y, Minecraft.getInstance().getItemRenderer().getModel(itemIn, (Level)null, entityIn, 0), scale);
             } catch (Throwable throwable) {
                 CrashReport crashreport = CrashReport.forThrowable(throwable, "Rendering item");
                 CrashReportCategory crashreportcategory = crashreport.addCategory("Item being rendered");
@@ -100,37 +78,36 @@ public class ItemRenderUtil {
         }
     }
 
-    protected static void renderItemModelIntoGUI(ItemStack stack, int x, int y, IBakedModel bakedmodel, float scale) {
-        RenderSystem.pushMatrix();
-        Minecraft.getInstance().getTextureManager().bind(AtlasTexture.LOCATION_BLOCKS);
-        Minecraft.getInstance().getTextureManager().getTexture(AtlasTexture.LOCATION_BLOCKS).setFilter(false, false);
-        RenderSystem.enableRescaleNormal();
-        RenderSystem.enableAlphaTest();
-        RenderSystem.defaultAlphaFunc();
+    protected static void renderItemModelIntoGUI(ItemStack stack, int x, int y, BakedModel bakedmodel, float scale) {
+        RenderHelpers.bindTexture(TextureAtlas.LOCATION_BLOCKS);
+        Minecraft.getInstance().getTextureManager().getTexture(TextureAtlas.LOCATION_BLOCKS).setFilter(false, false);
         RenderSystem.enableBlend();
         RenderSystem.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
-        RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
-        RenderSystem.translatef((float)x, (float)y, 100.0F + Minecraft.getInstance().getItemRenderer().blitOffset);
-        RenderSystem.translatef(8.0F, 8.0F, 0.0F);
-        RenderSystem.scalef(1.0F, -1.0F, 1.0F);
-        RenderSystem.scalef(16.0F, 16.0F, 16.0F);
-        MatrixStack matrixstack = new MatrixStack();
-        IRenderTypeBuffer.Impl irendertypebuffer$impl = Minecraft.getInstance().renderBuffers().bufferSource();
+        RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
+        PoseStack poseStack = RenderSystem.getModelViewStack();
+        poseStack.pushPose();
+        poseStack.scale(scale / 16, scale / 16, 1);
+        poseStack.translate((float)x, (float)y, 100.0F + Minecraft.getInstance().getItemRenderer().blitOffset);
+        poseStack.translate(8.0F, 8.0F, 0.0F);
+        poseStack.scale(1.0F, -1.0F, 1.0F);
+        poseStack.scale(16.0F, 16.0F, 16.0F);
+        RenderSystem.applyModelViewMatrix();
+        PoseStack matrixstack = new PoseStack();
+        MultiBufferSource.BufferSource irendertypebuffer$impl = Minecraft.getInstance().renderBuffers().bufferSource();
         boolean flag = !bakedmodel.usesBlockLight();
         if (flag) {
-            ItemLightingUtil.setupGuiFlatDiffuseLighting(scale);
+            Lighting.setupForFlatItems();
         }
 
-        Minecraft.getInstance().getItemRenderer().render(stack, ItemCameraTransforms.TransformType.GUI, false, matrixstack, irendertypebuffer$impl, 15728880, OverlayTexture.NO_OVERLAY, bakedmodel);
+        Minecraft.getInstance().getItemRenderer().render(stack, ItemTransforms.TransformType.GUI, false, matrixstack, irendertypebuffer$impl, 15728880, OverlayTexture.NO_OVERLAY, bakedmodel);
         irendertypebuffer$impl.endBatch();
         RenderSystem.enableDepthTest();
         if (flag) {
-            RenderHelper.setupFor3DItems();
+            Lighting.setupFor3DItems();
         }
 
-        RenderSystem.disableAlphaTest();
-        RenderSystem.disableRescaleNormal();
-        RenderSystem.popMatrix();
+        poseStack.popPose();
+        RenderSystem.applyModelViewMatrix();
     }
 
 }

@@ -6,8 +6,8 @@ import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.minecraft.client.Minecraft;
-import net.minecraft.command.CommandSource;
-import net.minecraft.command.Commands;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.commands.Commands;
 import org.cyclops.iconexporter.GeneralConfig;
 import org.cyclops.iconexporter.client.gui.ScreenIconExporter;
 
@@ -16,7 +16,7 @@ import org.cyclops.iconexporter.client.gui.ScreenIconExporter;
  * @author rubensworks
  *
  */
-public class CommandExport implements Command<CommandSource> {
+public class CommandExport implements Command<CommandSourceStack> {
 
     private final boolean param;
 
@@ -25,7 +25,7 @@ public class CommandExport implements Command<CommandSource> {
     }
 
     @Override
-    public int run(CommandContext<CommandSource> context) throws CommandSyntaxException {
+    public int run(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
         // Determine the scale
         int scale = GeneralConfig.defaultScale;
         if (param) {
@@ -39,7 +39,7 @@ public class CommandExport implements Command<CommandSource> {
         return 0;
     }
 
-    public static LiteralArgumentBuilder<CommandSource> make() {
+    public static LiteralArgumentBuilder<CommandSourceStack> make() {
         return Commands.literal("export")
                 .executes(new CommandExport(false))
                 .then(Commands.argument("scale", IntegerArgumentType.integer(1))

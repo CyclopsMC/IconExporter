@@ -37,8 +37,9 @@ group = "org.cyclops.iconexporter"
 archivesBaseName = "IconExporter"
 
 // Set Java details
-sourceCompatibility = 1.8
-targetCompatibility = 1.8
+java.toolchain.languageVersion = JavaLanguageVersion.of(17)
+compileJava.options.compilerArgs << "-Xmaxerrs" << "9999"
+println('Java: ' + System.getProperty('java.version') + ' JVM: ' + System.getProperty('java.vm.version') + '(' + System.getProperty('java.vendor') + ') Arch: ' + System.getProperty('os.arch'))
 
 // Load secrets
 def getSecrets() {

@@ -2,9 +2,9 @@ package org.cyclops.iconexporter.client.gui;
 
 import com.google.common.base.Charsets;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.texture.NativeImage;
-import net.minecraft.nbt.INBT;
-import net.minecraft.util.ScreenShotHelper;
+import com.mojang.blaze3d.platform.NativeImage;
+import net.minecraft.nbt.Tag;
+import net.minecraft.client.Screenshot;
 import org.apache.commons.io.FileUtils;
 import org.apache.logging.log4j.Level;
 import org.cyclops.iconexporter.IconExporter;
@@ -19,9 +19,9 @@ import java.io.IOException;
  */
 public class ImageExportUtil {
 
-    public static void exportImageFromScreenshot(File dir, String key, int guiWidth, int guiHeight, int scaleImage, int backgroundColor) throws IOException {
+    public static void exportImageFromScreenshot(File dir, String key, int scaleImage, int backgroundColor) throws IOException {
         // Take a screenshot
-        NativeImage image = ScreenShotHelper.takeScreenshot(guiWidth, guiHeight, Minecraft.getInstance().getMainRenderTarget());
+        NativeImage image = Screenshot.takeScreenshot(Minecraft.getInstance().getMainRenderTarget());
         image = getSubImage(image, scaleImage, scaleImage);
 
         // Convert our background color to a fully transparent pixel
@@ -60,7 +60,7 @@ public class ImageExportUtil {
         }
     }
 
-    public static void exportNbtFile(File dir, String key, INBT tag) throws IOException {
+    public static void exportNbtFile(File dir, String key, Tag tag) throws IOException {
         // Write the file
         key = key.replaceAll(":", "__");
         try {

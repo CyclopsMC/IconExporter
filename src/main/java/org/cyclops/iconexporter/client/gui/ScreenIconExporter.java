@@ -1,19 +1,19 @@
 package org.cyclops.iconexporter.client.gui;
 
 import com.google.common.collect.Queues;
-import com.mojang.blaze3d.matrix.MatrixStack;
+import com.mojang.blaze3d.vertex.PoseStack;
+import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.fluid.Fluid;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemGroup;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.INBT;
-import net.minecraft.util.NonNullList;
-import net.minecraft.util.RegistryKey;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.Util;
-import net.minecraft.util.text.TranslationTextComponent;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.core.NonNullList;
+import net.minecraft.nbt.Tag;
+import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.CreativeModeTab;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.material.Fluid;
 import net.minecraftforge.registries.ForgeRegistries;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.cyclops.cyclopscore.datastructure.Wrapper;
@@ -42,31 +42,31 @@ public class ScreenIconExporter extends Screen {
     private final Queue<IExportTask> exportTasks;
 
     public ScreenIconExporter(int scaleImage, double scaleGui) {
-        super(new TranslationTextComponent("gui.itemexporter.name"));
+        super(new TranslatableComponent("gui.itemexporter.name"));
         this.scaleImage = scaleImage;
         this.scaleGui = scaleGui;
         this.exportTasks = this.createExportTasks();
     }
 
     @Override
-    public void render(MatrixStack matrixStack, int mouseX, int mouseY, float partialTicks) {
+    public void render(PoseStack matrixStack, int mouseX, int mouseY, float partialTicks) {
         super.render(matrixStack, mouseX, mouseY, partialTicks);
 
         if (exportTasks.isEmpty()) {
             Minecraft.getInstance().setScreen(null);
-            Minecraft.getInstance().player.sendMessage(new TranslationTextComponent("gui.itemexporter.finished"), Util.NIL_UUID);
+            Minecraft.getInstance().player.sendMessage(new TranslatableComponent("gui.itemexporter.finished"), Util.NIL_UUID);
         } else {
             IExportTask task = exportTasks.poll();
             try {
                 task.run(matrixStack);
             } catch (IOException e) {
-                Minecraft.getInstance().player.sendMessage(new TranslationTextComponent("gui.itemexporter.error"), Util.NIL_UUID);
+                Minecraft.getInstance().player.sendMessage(new TranslatableComponent("gui.itemexporter.error"), Util.NIL_UUID);
                 e.printStackTrace();
             }
         }
     }
 
-    public String serializeNbtTag(INBT tag) {
+    public String serializeNbtTag(Tag tag) {
         if (GeneralConfig.fileNameHashTag) {
             return DigestUtils.md5Hex(tag.toString());
         } else {
@@ -88,7 +88,7 @@ public class ScreenIconExporter extends Screen {
         Queue<IExportTask> exportTasks = Queues.newArrayDeque();
 
         // Add fluids
-        for (Map.Entry<RegistryKey<Fluid>, Fluid> fluidEntry : ForgeRegistries.FLUIDS.getEntries()) {
+        for (Map.Entry<ResourceKey<Fluid>, Fluid> fluidEntry : ForgeRegistries.FLUIDS.getEntries()) {
             tasks.set(tasks.get() + 1);
             String subKey = "fluid:" + fluidEntry.getKey().location();
             exportTasks.add((matrixStack) -> {
@@ -96,7 +96,7 @@ public class ScreenIconExporter extends Screen {
                 signalStatus(tasks, taskProcessed);
                 fill(matrixStack, 0, 0, scaleModifiedRounded, scaleModifiedRounded, BACKGROUND_COLOR);
                 ItemRenderUtil.renderFluid(this, matrixStack, fluidEntry.getValue(), scaleModified);
-                ImageExportUtil.exportImageFromScreenshot(baseDir, subKey, this.width, this.height, this.scaleImage, BACKGROUND_COLOR_SHIFTED);
+                ImageExportUtil.exportImageFromScreenshot(baseDir, subKey, this.scaleImage, BACKGROUND_COLOR_SHIFTED);
             });
         }
 
@@ -104,7 +104,7 @@ public class ScreenIconExporter extends Screen {
         for (ResourceLocation key : ForgeRegistries.ITEMS.getKeys()) {
             Item value = ForgeRegistries.ITEMS.getValue(key);
             NonNullList<ItemStack> subItems = NonNullList.create();
-            value.fillItemCategory(ItemGroup.TAB_SEARCH, subItems);
+            value.fillItemCategory(CreativeModeTab.TAB_SEARCH, subItems);
             for (ItemStack subItem : subItems) {
                 tasks.set(tasks.get() + 1);
                 String subKey = key + (subItem.hasTag() ? "__" + serializeNbtTag(subItem.getTag()) : "");
@@ -112,8 +112,8 @@ public class ScreenIconExporter extends Screen {
                     taskProcessed.set(taskProcessed.get() + 1);
                     signalStatus(tasks, taskProcessed);
                     fill(matrixStack, 0, 0, scaleModifiedRounded, scaleModifiedRounded, BACKGROUND_COLOR);
-                    ItemRenderUtil.renderItem(subItem, scaleModified);
-                    ImageExportUtil.exportImageFromScreenshot(baseDir, subKey, this.width, this.height, this.scaleImage, BACKGROUND_COLOR_SHIFTED);
+                    ItemRenderUtil.renderItem(matrixStack, subItem, scaleModified);
+                    ImageExportUtil.exportImageFromScreenshot(baseDir, subKey, this.scaleImage, BACKGROUND_COLOR_SHIFTED);
                     if (subItem.hasTag() && GeneralConfig.fileNameHashTag) {
                         ImageExportUtil.exportNbtFile(baseDir, subKey, subItem.getTag());
                     }
@@ -125,7 +125,7 @@ public class ScreenIconExporter extends Screen {
     }
 
     protected void signalStatus(Wrapper<Integer> tasks, Wrapper<Integer> taskProcessed) {
-        Minecraft.getInstance().player.displayClientMessage(new TranslationTextComponent("gui.itemexporter.status", taskProcessed.get(), tasks.get()), true);
+        Minecraft.getInstance().player.displayClientMessage(new TranslatableComponent("gui.itemexporter.status", taskProcessed.get(), tasks.get()), true);
     }
 
 }

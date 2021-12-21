@@ -11,6 +11,7 @@ buildscript {
 
 plugins {
     id 'com.matthewprenger.cursegradle' version '1.4.0'
+    id 'com.diffplug.spotless' version '5.14.3'
 }
 
 apply plugin: 'net.minecraftforge.gradle'
@@ -277,5 +278,15 @@ idea {
             File excludeDir = new File(projectDir, excludeDirName)
             excludeDirs.add(excludeDir)
         }
+    }
+}
+
+spotless {
+    java {
+        target 'src/*/java/org/cyclops/**/*.java'
+
+        endWithNewline()
+        trimTrailingWhitespace()
+        removeUnusedImports()
     }
 }

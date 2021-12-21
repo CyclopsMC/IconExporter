@@ -21,7 +21,7 @@ import org.cyclops.iconexporter.proxy.CommonProxy;
  */
 @Mod(Reference.MOD_ID)
 public class IconExporter extends ModBaseVersionable<IconExporter> {
-    
+
     /**
      * The unique instance of this mod.
      */
@@ -71,7 +71,7 @@ public class IconExporter extends ModBaseVersionable<IconExporter> {
     public static void clog(String message) {
         clog(Level.INFO, message);
     }
-    
+
     /**
      * Log a new message of the given level for this mod.
      * @param level The level in which the message must be shown.
@@ -80,5 +80,5 @@ public class IconExporter extends ModBaseVersionable<IconExporter> {
     public static void clog(Level level, String message) {
         IconExporter._instance.getLoggerHelper().log(level, message);
     }
-    
+
 }

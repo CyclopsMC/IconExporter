@@ -53,14 +53,14 @@ public class ScreenIconExporter extends Screen {
         super.render(matrixStack, mouseX, mouseY, partialTicks);
 
         if (exportTasks.isEmpty()) {
-            Minecraft.getInstance().displayGuiScreen(null);
-            Minecraft.getInstance().player.sendMessage(new TranslationTextComponent("gui.itemexporter.finished"), Util.DUMMY_UUID);
+            Minecraft.getInstance().setScreen(null);
+            Minecraft.getInstance().player.sendMessage(new TranslationTextComponent("gui.itemexporter.finished"), Util.NIL_UUID);
         } else {
             IExportTask task = exportTasks.poll();
             try {
                 task.run(matrixStack);
             } catch (IOException e) {
-                Minecraft.getInstance().player.sendMessage(new TranslationTextComponent("gui.itemexporter.error"), Util.DUMMY_UUID);
+                Minecraft.getInstance().player.sendMessage(new TranslationTextComponent("gui.itemexporter.error"), Util.NIL_UUID);
                 e.printStackTrace();
             }
         }
@@ -79,7 +79,7 @@ public class ScreenIconExporter extends Screen {
         int scaleModifiedRounded = (int) Math.ceil(scaleModified);
 
         // Initialize our output folder
-        File baseDir = new File(Minecraft.getInstance().gameDir, "icon-exports-x" + this.scaleImage);
+        File baseDir = new File(Minecraft.getInstance().gameDirectory, "icon-exports-x" + this.scaleImage);
         baseDir.mkdir();
 
         // Create a list of tasks
@@ -90,7 +90,7 @@ public class ScreenIconExporter extends Screen {
         // Add fluids
         for (Map.Entry<RegistryKey<Fluid>, Fluid> fluidEntry : ForgeRegistries.FLUIDS.getEntries()) {
             tasks.set(tasks.get() + 1);
-            String subKey = "fluid:" + fluidEntry.getKey().getLocation();
+            String subKey = "fluid:" + fluidEntry.getKey().location();
             exportTasks.add((matrixStack) -> {
                 taskProcessed.set(taskProcessed.get() + 1);
                 signalStatus(tasks, taskProcessed);
@@ -104,7 +104,7 @@ public class ScreenIconExporter extends Screen {
         for (ResourceLocation key : ForgeRegistries.ITEMS.getKeys()) {
             Item value = ForgeRegistries.ITEMS.getValue(key);
             NonNullList<ItemStack> subItems = NonNullList.create();
-            value.fillItemGroup(ItemGroup.SEARCH, subItems);
+            value.fillItemCategory(ItemGroup.TAB_SEARCH, subItems);
             for (ItemStack subItem : subItems) {
                 tasks.set(tasks.get() + 1);
                 String subKey = key + (subItem.hasTag() ? "__" + serializeNbtTag(subItem.getTag()) : "");
@@ -125,7 +125,7 @@ public class ScreenIconExporter extends Screen {
     }
 
     protected void signalStatus(Wrapper<Integer> tasks, Wrapper<Integer> taskProcessed) {
-        Minecraft.getInstance().player.sendStatusMessage(new TranslationTextComponent("gui.itemexporter.status", taskProcessed.get(), tasks.get()), true);
+        Minecraft.getInstance().player.displayClientMessage(new TranslationTextComponent("gui.itemexporter.status", taskProcessed.get(), tasks.get()), true);
     }
 
 }

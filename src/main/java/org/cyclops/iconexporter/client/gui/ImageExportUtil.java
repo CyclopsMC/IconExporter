@@ -21,7 +21,7 @@ public class ImageExportUtil {
 
     public static void exportImageFromScreenshot(File dir, String key, int guiWidth, int guiHeight, int scaleImage, int backgroundColor) throws IOException {
         // Take a screenshot
-        NativeImage image = ScreenShotHelper.createScreenshot(guiWidth, guiHeight, Minecraft.getInstance().getFramebuffer());
+        NativeImage image = ScreenShotHelper.takeScreenshot(guiWidth, guiHeight, Minecraft.getInstance().getMainRenderTarget());
         image = getSubImage(image, scaleImage, scaleImage);
 
         // Convert our background color to a fully transparent pixel
@@ -47,7 +47,7 @@ public class ImageExportUtil {
         try {
             File file = new File(dir, key + ".png").getCanonicalFile();
             try {
-                image.write(file);
+                image.writeToFile(file);
             } catch (NullPointerException e) {
                 e.printStackTrace();
                 throw new IOException("Error while writing the PNG image " + file);
@@ -82,9 +82,9 @@ public class ImageExportUtil {
 
         // Modified from NativeImage#copyImageData
         for(int y = 0; y < imageNew.getHeight(); y++) {
-            int pointerOffset = y * image.getWidth() * image.getFormat().getPixelSize();
-            int pointerOffsetNew = y * imageNew.getWidth() * imageNew.getFormat().getPixelSize();
-            MemoryUtil.memCopy(image.imagePointer + (long)pointerOffset, imageNew.imagePointer + (long)pointerOffsetNew, (long)imageNew.getWidth() * image.getFormat().getPixelSize()); // changed here to multiply number of bytes with pixel size
+            int pointerOffset = y * image.getWidth() * image.format().components();
+            int pointerOffsetNew = y * imageNew.getWidth() * imageNew.format().components();
+            MemoryUtil.memCopy(image.pixels + (long)pointerOffset, imageNew.pixels + (long)pointerOffsetNew, (long)imageNew.getWidth() * image.format().components()); // changed here to multiply number of bytes with pixel size
         }
 
         return imageNew;

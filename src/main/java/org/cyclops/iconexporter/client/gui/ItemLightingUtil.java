@@ -10,7 +10,7 @@ import net.minecraft.util.math.vector.Vector3f;
 import net.minecraft.util.math.vector.Vector4f;
 
 /**
- * The same as {@link RenderHelper#enableStandardItemLighting()},
+ * The same as {@link RenderHelper#turnBackOn()},
  * but with a scale that can be applied.
  *
  * Inspired by mezz's ZoomRenderHelper
@@ -36,22 +36,22 @@ public class ItemLightingUtil {
 
     public static void enableStandardItemLighting(float scale) {
         RenderSystem.enableLighting();
-        GlStateManager.enableLight(0);
-        GlStateManager.enableLight(1);
+        GlStateManager._enableLight(0);
+        GlStateManager._enableLight(1);
         RenderSystem.enableColorMaterial();
         RenderSystem.colorMaterial(1032, 5634);
-        GlStateManager.light(16384, 4611, GlStateManager.getBuffer((float) LIGHT0_POS.x, (float) LIGHT0_POS.y, (float) LIGHT0_POS.z, 0.0f));
+        GlStateManager._light(16384, 4611, GlStateManager.getBuffer((float) LIGHT0_POS.x, (float) LIGHT0_POS.y, (float) LIGHT0_POS.z, 0.0f));
         float lightStrength = 0.3F * scale;
-        GlStateManager.light(16384, 4609, GlStateManager.getBuffer(lightStrength, lightStrength, lightStrength, 1.0F));
-        GlStateManager.light(16384, 4608, GlStateManager.getBuffer(0.0F, 0.0F, 0.0F, 1.0F));
-        GlStateManager.light(16384, 4610, GlStateManager.getBuffer(0.0F, 0.0F, 0.0F, 1.0F));
-        GlStateManager.light(16385, 4611, GlStateManager.getBuffer((float) LIGHT1_POS.x, (float) LIGHT1_POS.y, (float) LIGHT1_POS.z, 0.0f));
-        GlStateManager.light(16385, 4609, GlStateManager.getBuffer(lightStrength, lightStrength, lightStrength, 1.0F));
-        GlStateManager.light(16385, 4608, GlStateManager.getBuffer(0.0F, 0.0F, 0.0F, 1.0F));
-        GlStateManager.light(16385, 4610, GlStateManager.getBuffer(0.0F, 0.0F, 0.0F, 1.0F));
+        GlStateManager._light(16384, 4609, GlStateManager.getBuffer(lightStrength, lightStrength, lightStrength, 1.0F));
+        GlStateManager._light(16384, 4608, GlStateManager.getBuffer(0.0F, 0.0F, 0.0F, 1.0F));
+        GlStateManager._light(16384, 4610, GlStateManager.getBuffer(0.0F, 0.0F, 0.0F, 1.0F));
+        GlStateManager._light(16385, 4611, GlStateManager.getBuffer((float) LIGHT1_POS.x, (float) LIGHT1_POS.y, (float) LIGHT1_POS.z, 0.0f));
+        GlStateManager._light(16385, 4609, GlStateManager.getBuffer(lightStrength, lightStrength, lightStrength, 1.0F));
+        GlStateManager._light(16385, 4608, GlStateManager.getBuffer(0.0F, 0.0F, 0.0F, 1.0F));
+        GlStateManager._light(16385, 4610, GlStateManager.getBuffer(0.0F, 0.0F, 0.0F, 1.0F));
         RenderSystem.shadeModel(7424);
         float ambientLightStrength = 0.4F;
-        GlStateManager.lightModel(2899, GlStateManager.getBuffer(ambientLightStrength, ambientLightStrength, ambientLightStrength, 1.0F));
+        GlStateManager._lightModel(2899, GlStateManager.getBuffer(ambientLightStrength, ambientLightStrength, ambientLightStrength, 1.0F));
     }
 
 
@@ -61,35 +61,35 @@ public class ItemLightingUtil {
         RenderSystem.assertThread(RenderSystem::isOnRenderThread);
         Matrix4f matrix4f = new Matrix4f();
         matrix4f.setIdentity();
-        matrix4f.mul(Matrix4f.makeScale(1.0F, -1.0F, 1.0F));
-        matrix4f.mul(Vector3f.YP.rotationDegrees(-22.5F));
-        matrix4f.mul(Vector3f.XP.rotationDegrees(135.0F));
+        matrix4f.multiply(Matrix4f.createScaleMatrix(1.0F, -1.0F, 1.0F));
+        matrix4f.multiply(Vector3f.YP.rotationDegrees(-22.5F));
+        matrix4f.multiply(Vector3f.XP.rotationDegrees(135.0F));
         setupWorldDiffuseLighting(matrix4f, scale);
     }
 
     public static void setupWorldDiffuseLighting(Matrix4f p_227661_0_, float scale) {
         RenderSystem.assertThread(RenderSystem::isOnRenderThread);
-        GlStateManager.pushMatrix();
-        GlStateManager.loadIdentity();
-        GlStateManager.enableLight(0);
-        GlStateManager.enableLight(1);
+        GlStateManager._pushMatrix();
+        GlStateManager._loadIdentity();
+        GlStateManager._enableLight(0);
+        GlStateManager._enableLight(1);
         Vector4f vector4f = new Vector4f(DIFFUSE_LIGHT_0);
         vector4f.transform(p_227661_0_);
-        GlStateManager.light(16384, 4611, GlStateManager.getBuffer(vector4f.getX(), vector4f.getY(), vector4f.getZ(), 0.0F));
+        GlStateManager._light(16384, 4611, GlStateManager.getBuffer(vector4f.x(), vector4f.y(), vector4f.z(), 0.0F));
         float lightStrength = 0.6F * scale;
-        GlStateManager.light(16384, 4609, GlStateManager.getBuffer(lightStrength, lightStrength, lightStrength, 1.0F));
-        GlStateManager.light(16384, 4608, GlStateManager.getBuffer(0.0F, 0.0F, 0.0F, 1.0F));
-        GlStateManager.light(16384, 4610, GlStateManager.getBuffer(0.0F, 0.0F, 0.0F, 1.0F));
+        GlStateManager._light(16384, 4609, GlStateManager.getBuffer(lightStrength, lightStrength, lightStrength, 1.0F));
+        GlStateManager._light(16384, 4608, GlStateManager.getBuffer(0.0F, 0.0F, 0.0F, 1.0F));
+        GlStateManager._light(16384, 4610, GlStateManager.getBuffer(0.0F, 0.0F, 0.0F, 1.0F));
         Vector4f vector4f1 = new Vector4f(DIFFUSE_LIGHT_1);
         vector4f1.transform(p_227661_0_);
-        GlStateManager.light(16385, 4611, GlStateManager.getBuffer(vector4f1.getX(), vector4f1.getY(), vector4f1.getZ(), 0.0F));
-        GlStateManager.light(16385, 4609, GlStateManager.getBuffer(lightStrength, lightStrength, lightStrength, 1.0F));
-        GlStateManager.light(16385, 4608, GlStateManager.getBuffer(0.0F, 0.0F, 0.0F, 1.0F));
-        GlStateManager.light(16385, 4610, GlStateManager.getBuffer(0.0F, 0.0F, 0.0F, 1.0F));
-        GlStateManager.shadeModel(7424);
+        GlStateManager._light(16385, 4611, GlStateManager.getBuffer(vector4f1.x(), vector4f1.y(), vector4f1.z(), 0.0F));
+        GlStateManager._light(16385, 4609, GlStateManager.getBuffer(lightStrength, lightStrength, lightStrength, 1.0F));
+        GlStateManager._light(16385, 4608, GlStateManager.getBuffer(0.0F, 0.0F, 0.0F, 1.0F));
+        GlStateManager._light(16385, 4610, GlStateManager.getBuffer(0.0F, 0.0F, 0.0F, 1.0F));
+        GlStateManager._shadeModel(7424);
         float f1 = 0.4F;
-        GlStateManager.lightModel(2899, GlStateManager.getBuffer(0.4F, 0.4F, 0.4F, 1.0F));
-        GlStateManager.popMatrix();
+        GlStateManager._lightModel(2899, GlStateManager.getBuffer(0.4F, 0.4F, 0.4F, 1.0F));
+        GlStateManager._popMatrix();
     }
 
 }

@@ -56,11 +56,11 @@ public class ItemRenderUtil {
         RenderSystem.disablePolygonOffset();
 
         RenderSystem.popMatrix();
-        RenderHelper.disableStandardItemLighting();
+        RenderHelper.turnOff();
     }
 
     public static void renderFluid(AbstractGui gui, MatrixStack matrixStack, Fluid fluid, float scale) {
-        GlStateManager.scaled(scale / 16, scale / 16, scale / 16);
+        GlStateManager._scaled(scale / 16, scale / 16, scale / 16);
         ItemLightingUtil.enableGUIStandardItemLighting(scale);
         GuiHelpers.renderFluidSlot(gui, matrixStack, new FluidStack(fluid, FluidHelpers.BUCKET_VOLUME), 0, 0);
     }
@@ -73,59 +73,59 @@ public class ItemRenderUtil {
 
     public static void renderItemAndEffectIntoGUI(@Nullable LivingEntity entityIn, ItemStack itemIn, int x, int y, float scale) {
         if (!itemIn.isEmpty()) {
-            Minecraft.getInstance().getItemRenderer().zLevel += 50.0F;
+            Minecraft.getInstance().getItemRenderer().blitOffset += 50.0F;
 
             try {
-                renderItemModelIntoGUI(itemIn, x, y, Minecraft.getInstance().getItemRenderer().getItemModelWithOverrides(itemIn, (World)null, entityIn), scale);
+                renderItemModelIntoGUI(itemIn, x, y, Minecraft.getInstance().getItemRenderer().getModel(itemIn, (World)null, entityIn), scale);
             } catch (Throwable throwable) {
-                CrashReport crashreport = CrashReport.makeCrashReport(throwable, "Rendering item");
-                CrashReportCategory crashreportcategory = crashreport.makeCategory("Item being rendered");
-                crashreportcategory.addDetail("Item Type", () -> {
+                CrashReport crashreport = CrashReport.forThrowable(throwable, "Rendering item");
+                CrashReportCategory crashreportcategory = crashreport.addCategory("Item being rendered");
+                crashreportcategory.setDetail("Item Type", () -> {
                     return String.valueOf((Object)itemIn.getItem());
                 });
-                crashreportcategory.addDetail("Registry Name", () -> String.valueOf(itemIn.getItem().getRegistryName()));
-                crashreportcategory.addDetail("Item Damage", () -> {
-                    return String.valueOf(itemIn.getDamage());
+                crashreportcategory.setDetail("Registry Name", () -> String.valueOf(itemIn.getItem().getRegistryName()));
+                crashreportcategory.setDetail("Item Damage", () -> {
+                    return String.valueOf(itemIn.getDamageValue());
                 });
-                crashreportcategory.addDetail("Item NBT", () -> {
+                crashreportcategory.setDetail("Item NBT", () -> {
                     return String.valueOf((Object)itemIn.getTag());
                 });
-                crashreportcategory.addDetail("Item Foil", () -> {
-                    return String.valueOf(itemIn.hasEffect());
+                crashreportcategory.setDetail("Item Foil", () -> {
+                    return String.valueOf(itemIn.hasFoil());
                 });
                 throw new ReportedException(crashreport);
             }
 
-            Minecraft.getInstance().getItemRenderer().zLevel -= 50.0F;
+            Minecraft.getInstance().getItemRenderer().blitOffset -= 50.0F;
         }
     }
 
     protected static void renderItemModelIntoGUI(ItemStack stack, int x, int y, IBakedModel bakedmodel, float scale) {
         RenderSystem.pushMatrix();
-        Minecraft.getInstance().getTextureManager().bindTexture(AtlasTexture.LOCATION_BLOCKS_TEXTURE);
-        Minecraft.getInstance().getTextureManager().getTexture(AtlasTexture.LOCATION_BLOCKS_TEXTURE).setBlurMipmapDirect(false, false);
+        Minecraft.getInstance().getTextureManager().bind(AtlasTexture.LOCATION_BLOCKS);
+        Minecraft.getInstance().getTextureManager().getTexture(AtlasTexture.LOCATION_BLOCKS).setFilter(false, false);
         RenderSystem.enableRescaleNormal();
         RenderSystem.enableAlphaTest();
         RenderSystem.defaultAlphaFunc();
         RenderSystem.enableBlend();
         RenderSystem.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
         RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
-        RenderSystem.translatef((float)x, (float)y, 100.0F + Minecraft.getInstance().getItemRenderer().zLevel);
+        RenderSystem.translatef((float)x, (float)y, 100.0F + Minecraft.getInstance().getItemRenderer().blitOffset);
         RenderSystem.translatef(8.0F, 8.0F, 0.0F);
         RenderSystem.scalef(1.0F, -1.0F, 1.0F);
         RenderSystem.scalef(16.0F, 16.0F, 16.0F);
         MatrixStack matrixstack = new MatrixStack();
-        IRenderTypeBuffer.Impl irendertypebuffer$impl = Minecraft.getInstance().getRenderTypeBuffers().getBufferSource();
-        boolean flag = !bakedmodel.isSideLit();
+        IRenderTypeBuffer.Impl irendertypebuffer$impl = Minecraft.getInstance().renderBuffers().bufferSource();
+        boolean flag = !bakedmodel.usesBlockLight();
         if (flag) {
             ItemLightingUtil.setupGuiFlatDiffuseLighting(scale);
         }
 
-        Minecraft.getInstance().getItemRenderer().renderItem(stack, ItemCameraTransforms.TransformType.GUI, false, matrixstack, irendertypebuffer$impl, 15728880, OverlayTexture.NO_OVERLAY, bakedmodel);
-        irendertypebuffer$impl.finish();
+        Minecraft.getInstance().getItemRenderer().render(stack, ItemCameraTransforms.TransformType.GUI, false, matrixstack, irendertypebuffer$impl, 15728880, OverlayTexture.NO_OVERLAY, bakedmodel);
+        irendertypebuffer$impl.endBatch();
         RenderSystem.enableDepthTest();
         if (flag) {
-            RenderHelper.setupGui3DDiffuseLighting();
+            RenderHelper.setupFor3DItems();
         }
 
         RenderSystem.disableAlphaTest();

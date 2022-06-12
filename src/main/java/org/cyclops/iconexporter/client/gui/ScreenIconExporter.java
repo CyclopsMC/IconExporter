@@ -2,12 +2,11 @@ package org.cyclops.iconexporter.client.gui;
 
 import com.google.common.collect.Queues;
 import com.mojang.blaze3d.vertex.PoseStack;
-import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.core.NonNullList;
 import net.minecraft.nbt.Tag;
-import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.CreativeModeTab;
@@ -42,7 +41,7 @@ public class ScreenIconExporter extends Screen {
     private final Queue<IExportTask> exportTasks;
 
     public ScreenIconExporter(int scaleImage, double scaleGui) {
-        super(new TranslatableComponent("gui.itemexporter.name"));
+        super(Component.translatable("gui.itemexporter.name"));
         this.scaleImage = scaleImage;
         this.scaleGui = scaleGui;
         this.exportTasks = this.createExportTasks();
@@ -54,13 +53,13 @@ public class ScreenIconExporter extends Screen {
 
         if (exportTasks.isEmpty()) {
             Minecraft.getInstance().setScreen(null);
-            Minecraft.getInstance().player.sendMessage(new TranslatableComponent("gui.itemexporter.finished"), Util.NIL_UUID);
+            Minecraft.getInstance().player.sendSystemMessage(Component.translatable("gui.itemexporter.finished"));
         } else {
             IExportTask task = exportTasks.poll();
             try {
                 task.run(matrixStack);
             } catch (IOException e) {
-                Minecraft.getInstance().player.sendMessage(new TranslatableComponent("gui.itemexporter.error"), Util.NIL_UUID);
+                Minecraft.getInstance().player.sendSystemMessage(Component.translatable("gui.itemexporter.error"));
                 e.printStackTrace();
             }
         }
@@ -125,7 +124,7 @@ public class ScreenIconExporter extends Screen {
     }
 
     protected void signalStatus(Wrapper<Integer> tasks, Wrapper<Integer> taskProcessed) {
-        Minecraft.getInstance().player.displayClientMessage(new TranslatableComponent("gui.itemexporter.status", taskProcessed.get(), tasks.get()), true);
+        Minecraft.getInstance().player.displayClientMessage(Component.translatable("gui.itemexporter.status", taskProcessed.get(), tasks.get()), true);
     }
 
 }

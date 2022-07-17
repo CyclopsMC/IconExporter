@@ -34,8 +34,10 @@ import java.util.Queue;
  */
 public class ScreenIconExporter extends Screen {
 
-    private static final int BACKGROUND_COLOR = Helpers.RGBAToInt(1, 0, 0, 255); // -16711680
-    private static final int BACKGROUND_COLOR_SHIFTED = -16777215; // For some reason, MC shifts around colors internally... (R seems to be moved from the 16th bit to the 0th bit)
+    // (a << 24) | (r << 16) | (g << 8) | b
+    private static final int BACKGROUND_COLOR = Helpers.RGBAToInt(254, 255, 255, 255); // -65537
+    // (a << 24) | (b << 16) | (g << 8) | r
+    private static final int BACKGROUND_COLOR_SHIFTED = (255 << 24) | (255 << 16) | (255 << 8) | 254; // For some reason, MC shifts around colors internally... (R seems to be moved from the 16th bit to the 0th bit)
 
     private final int scaleImage;
     private final double scaleGui;

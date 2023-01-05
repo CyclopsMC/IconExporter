@@ -2,7 +2,6 @@ package org.cyclops.iconexporter;
 
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import net.minecraft.commands.CommandSourceStack;
-import net.minecraft.world.item.CreativeModeTab;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.loading.FMLEnvironment;
 import org.apache.logging.log4j.Level;
@@ -53,8 +52,8 @@ public class IconExporter extends ModBaseVersionable<IconExporter> {
     }
 
     @Override
-    protected CreativeModeTab constructDefaultCreativeModeTab() {
-        return null;
+    protected boolean hasDefaultCreativeModeTab() {
+        return false;
     }
 
     @Override

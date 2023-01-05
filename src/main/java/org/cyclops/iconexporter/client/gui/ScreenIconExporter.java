@@ -4,15 +4,15 @@ import com.google.common.collect.Queues;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.core.NonNullList;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.CreativeModeTab;
-import net.minecraft.world.item.Item;
+import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.material.Fluid;
+import net.minecraftforge.common.CreativeModeTabRegistry;
 import net.minecraftforge.registries.ForgeRegistries;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.cyclops.cyclopscore.datastructure.Wrapper;
@@ -102,21 +102,23 @@ public class ScreenIconExporter extends Screen {
         }
 
         // Add items
-        for (ResourceLocation key : ForgeRegistries.ITEMS.getKeys()) {
-            Item value = ForgeRegistries.ITEMS.getValue(key);
-            NonNullList<ItemStack> subItems = NonNullList.create();
-            value.fillItemCategory(CreativeModeTab.TAB_SEARCH, subItems);
-            for (ItemStack subItem : subItems) {
+        CreativeModeTabs.tryRebuildTabContents(
+                Minecraft.getInstance().player.connection.enabledFeatures(),
+                Minecraft.getInstance().options.operatorItemsTab().get()
+        );
+        for (CreativeModeTab creativeModeTab : CreativeModeTabRegistry.getSortedCreativeModeTabs()) {
+            for (ItemStack itemStack : creativeModeTab.getDisplayItems()) {
+                ResourceLocation key = ForgeRegistries.ITEMS.getKey(itemStack.getItem());
                 tasks.set(tasks.get() + 1);
-                String subKey = key + (subItem.hasTag() ? "__" + serializeNbtTag(subItem.getTag()) : "");
+                String subKey = key + (itemStack.hasTag() ? "__" + serializeNbtTag(itemStack.getTag()) : "");
                 exportTasks.add((matrixStack) -> {
                     taskProcessed.set(taskProcessed.get() + 1);
                     signalStatus(tasks, taskProcessed);
                     fill(matrixStack, 0, 0, scaleModifiedRounded, scaleModifiedRounded, BACKGROUND_COLOR);
-                    ItemRenderUtil.renderItem(matrixStack, subItem, scaleModified);
+                    ItemRenderUtil.renderItem(matrixStack, itemStack, scaleModified);
                     ImageExportUtil.exportImageFromScreenshot(baseDir, subKey, this.scaleImage, BACKGROUND_COLOR_SHIFTED);
-                    if (subItem.hasTag() && GeneralConfig.fileNameHashTag) {
-                        ImageExportUtil.exportNbtFile(baseDir, subKey, subItem.getTag());
+                    if (itemStack.hasTag() && GeneralConfig.fileNameHashTag) {
+                        ImageExportUtil.exportNbtFile(baseDir, subKey, itemStack.getTag());
                     }
                 });
             }

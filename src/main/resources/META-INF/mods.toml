@@ -1,5 +1,5 @@
 modLoader="javafml"
-loaderVersion="[44,)"
+loaderVersion="[45,)"
 issueTrackerURL="https://github.com/CyclopsMC/IconExporter/issues"
 displayURL="https://www.curseforge.com/minecraft/mc-mods/iconexporter"
 license="MIT"
@@ -17,18 +17,18 @@ Exports item and block icons to files.
 [[dependencies.iconexporter]]
     modId="cyclopscore"
     mandatory=true
-    versionRange="[1.17.3,)"
+    versionRange="[1.18.2,)"
     ordering="NONE"
     side="BOTH"
 [[dependencies.iconexporter]]
     modId="forge"
     mandatory=true
-    versionRange="[44.1.0,)"
+    versionRange="[45.0.20,)"
     ordering="NONE"
     side="BOTH"
 [[dependencies.iconexporter]]
     modId="minecraft"
     mandatory=true
-    versionRange="[1.19.3,]"
+    versionRange="[1.19.4,]"
     ordering="NONE"
     side="BOTH"

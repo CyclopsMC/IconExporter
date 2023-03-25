@@ -104,7 +104,8 @@ public class ScreenIconExporter extends Screen {
         // Add items
         CreativeModeTabs.tryRebuildTabContents(
                 Minecraft.getInstance().player.connection.enabledFeatures(),
-                Minecraft.getInstance().options.operatorItemsTab().get()
+                Minecraft.getInstance().options.operatorItemsTab().get(),
+                Minecraft.getInstance().level.registryAccess()
         );
         for (CreativeModeTab creativeModeTab : CreativeModeTabRegistry.getSortedCreativeModeTabs()) {
             for (ItemStack itemStack : creativeModeTab.getDisplayItems()) {

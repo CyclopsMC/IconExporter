@@ -23,7 +23,7 @@ Exports item and block icons to files.
 [[dependencies.iconexporter]]
     modId="forge"
     mandatory=true
-    versionRange="[45.0.20,)"
+    versionRange="[45.0.50,)"
     ordering="NONE"
     side="BOTH"
 [[dependencies.iconexporter]]

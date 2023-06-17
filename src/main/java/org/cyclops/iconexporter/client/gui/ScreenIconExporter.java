@@ -1,8 +1,8 @@
 package org.cyclops.iconexporter.client.gui;
 
 import com.google.common.collect.Queues;
-import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
@@ -50,8 +50,8 @@ public class ScreenIconExporter extends Screen {
     }
 
     @Override
-    public void render(PoseStack matrixStack, int mouseX, int mouseY, float partialTicks) {
-        super.render(matrixStack, mouseX, mouseY, partialTicks);
+    public void render(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTicks) {
+        super.render(guiGraphics, mouseX, mouseY, partialTicks);
 
         if (exportTasks.isEmpty()) {
             Minecraft.getInstance().setScreen(null);
@@ -59,7 +59,7 @@ public class ScreenIconExporter extends Screen {
         } else {
             IExportTask task = exportTasks.poll();
             try {
-                task.run(matrixStack);
+                task.run(guiGraphics);
             } catch (IOException e) {
                 Minecraft.getInstance().player.sendSystemMessage(Component.translatable("gui.itemexporter.error"));
                 e.printStackTrace();
@@ -92,11 +92,11 @@ public class ScreenIconExporter extends Screen {
         for (Map.Entry<ResourceKey<Fluid>, Fluid> fluidEntry : ForgeRegistries.FLUIDS.getEntries()) {
             tasks.set(tasks.get() + 1);
             String subKey = "fluid:" + fluidEntry.getKey().location();
-            exportTasks.add((matrixStack) -> {
+            exportTasks.add((guiGraphics) -> {
                 taskProcessed.set(taskProcessed.get() + 1);
                 signalStatus(tasks, taskProcessed);
-                fill(matrixStack, 0, 0, scaleModifiedRounded, scaleModifiedRounded, BACKGROUND_COLOR);
-                ItemRenderUtil.renderFluid(this, matrixStack, fluidEntry.getValue(), scaleModified);
+                guiGraphics.fill(0, 0, scaleModifiedRounded, scaleModifiedRounded, BACKGROUND_COLOR);
+                ItemRenderUtil.renderFluid(guiGraphics, fluidEntry.getValue(), scaleModified);
                 ImageExportUtil.exportImageFromScreenshot(baseDir, subKey, this.scaleImage, BACKGROUND_COLOR_SHIFTED);
             });
         }
@@ -112,11 +112,11 @@ public class ScreenIconExporter extends Screen {
                 ResourceLocation key = ForgeRegistries.ITEMS.getKey(itemStack.getItem());
                 tasks.set(tasks.get() + 1);
                 String subKey = key + (itemStack.hasTag() ? "__" + serializeNbtTag(itemStack.getTag()) : "");
-                exportTasks.add((matrixStack) -> {
+                exportTasks.add((guiGraphics) -> {
                     taskProcessed.set(taskProcessed.get() + 1);
                     signalStatus(tasks, taskProcessed);
-                    fill(matrixStack, 0, 0, scaleModifiedRounded, scaleModifiedRounded, BACKGROUND_COLOR);
-                    ItemRenderUtil.renderItem(matrixStack, itemStack, scaleModified);
+                    guiGraphics.fill(0, 0, scaleModifiedRounded, scaleModifiedRounded, BACKGROUND_COLOR);
+                    ItemRenderUtil.renderItem(guiGraphics, itemStack, scaleModified);
                     ImageExportUtil.exportImageFromScreenshot(baseDir, subKey, this.scaleImage, BACKGROUND_COLOR_SHIFTED);
                     if (itemStack.hasTag() && GeneralConfig.fileNameHashTag) {
                         ImageExportUtil.exportNbtFile(baseDir, subKey, itemStack.getTag());

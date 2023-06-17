@@ -1,15 +1,5 @@
-// For those who want the bleeding edge
-buildscript {
-    repositories {
-        mavenCentral()
-        maven { url = 'https://maven.minecraftforge.net' }
-    }
-    dependencies {
-        classpath group: 'net.minecraftforge.gradle', name: 'ForgeGradle', version: '5.1.+', changing: true
-    }
-}
-
 plugins {
+    id 'net.minecraftforge.gradle' version '[6.0,6.2)'
     id 'com.matthewprenger.cursegradle' version '1.4.0'
     id 'com.diffplug.spotless' version '5.14.3'
 	id 'com.modrinth.minotaur' version '2.+'
@@ -171,7 +161,7 @@ build.dependsOn signJar
 
 task deobfJar(type: Jar) {
     from sourceSets.main.output
-    classifier = 'deobf'
+    archiveClassifier.set('deobf')
     manifest {
         attributes([
                 "FMLAT": "accesstransformer.cfg",
@@ -189,7 +179,7 @@ task deobfJar(type: Jar) {
 task apiJar(type: Jar) {
     from sourceSets.main.output
     from sourceSets.main.java
-    classifier = 'api'
+    archiveClassifier.set('api')
     include 'iconexporter/api/**'
 }
 

@@ -1,6 +1,6 @@
 package org.cyclops.iconexporter.client.gui;
 
-import com.mojang.blaze3d.vertex.PoseStack;
+import net.minecraft.client.gui.GuiGraphics;
 
 import java.io.IOException;
 
@@ -9,6 +9,6 @@ import java.io.IOException;
  */
 public interface IExportTask {
 
-    public void run(PoseStack matrixStack) throws IOException;
+    public void run(GuiGraphics guiGraphics) throws IOException;
 
 }

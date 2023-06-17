@@ -4,7 +4,7 @@ import com.mojang.blaze3d.platform.Lighting;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiComponent;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.client.resources.model.BakedModel;
@@ -24,15 +24,15 @@ import org.joml.Matrix4f;
  */
 public class ItemRenderUtil {
 
-    public static void renderItem(PoseStack poseStack, ItemStack itemStack, float scale) {
+    public static void renderItem(GuiGraphics gui, ItemStack itemStack, float scale) {
         // Based on Integrated Dynamics's ItemValueTypeWorldRenderer
-        renderGuiItem(poseStack, itemStack, 0, 0, scale);
+        renderGuiItem(gui.pose(), itemStack, 0, 0, scale);
         Lighting.setupFor3DItems();
     }
 
-    public static void renderFluid(GuiComponent gui, PoseStack matrixStack, Fluid fluid, float scale) {
-        matrixStack.scale(scale / 16, scale / 16, scale / 16);
-        GuiHelpers.renderFluidSlot(gui, matrixStack, new FluidStack(fluid, FluidHelpers.BUCKET_VOLUME), 0, 0);
+    public static void renderFluid(GuiGraphics gui, Fluid fluid, float scale) {
+        gui.pose().scale(scale / 16, scale / 16, scale / 16);
+        GuiHelpers.renderFluidSlot(gui, new FluidStack(fluid, FluidHelpers.BUCKET_VOLUME), 0, 0);
     }
 
     // ----- Everything below is modified from ItemRenderer#renderGuiItem (scale param was added) -----

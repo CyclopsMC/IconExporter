@@ -21,8 +21,9 @@ public class ImageExportUtil {
 
     public static void exportImageFromScreenshot(File dir, String key, int scaleImage, int backgroundColor) throws IOException {
         // Take a screenshot
-        NativeImage image = Screenshot.takeScreenshot(Minecraft.getInstance().getMainRenderTarget());
-        image = getSubImage(image, scaleImage, scaleImage);
+        NativeImage imageFull = Screenshot.takeScreenshot(Minecraft.getInstance().getMainRenderTarget());
+        NativeImage image = getSubImage(imageFull, scaleImage, scaleImage);
+        imageFull.close();
 
         // Convert our background color to a fully transparent pixel
         byte alpha = (byte) 256;

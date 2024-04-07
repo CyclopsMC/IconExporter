@@ -7,7 +7,6 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraft.world.item.ItemStack;
@@ -91,13 +90,13 @@ public class ScreenIconExporter extends Screen {
         // Add fluids
         for (Map.Entry<ResourceKey<Fluid>, Fluid> fluidEntry : ForgeRegistries.FLUIDS.getEntries()) {
             tasks.set(tasks.get() + 1);
-            String subKey = "fluid:" + fluidEntry.getKey().location();
+            String baseFilename = ImageExportUtil.genBaseFilenameFromFluid(fluidEntry.getKey());
             exportTasks.add((guiGraphics) -> {
                 taskProcessed.set(taskProcessed.get() + 1);
                 signalStatus(tasks, taskProcessed);
                 guiGraphics.fill(0, 0, scaleModifiedRounded, scaleModifiedRounded, BACKGROUND_COLOR);
                 ItemRenderUtil.renderFluid(guiGraphics, fluidEntry.getValue(), scaleModified);
-                ImageExportUtil.exportImageFromScreenshot(baseDir, subKey, this.scaleImage, BACKGROUND_COLOR_SHIFTED);
+                ImageExportUtil.exportImageFromScreenshot(baseDir, baseFilename, this.scaleImage, BACKGROUND_COLOR_SHIFTED);
             });
         }
 
@@ -109,17 +108,16 @@ public class ScreenIconExporter extends Screen {
         );
         for (CreativeModeTab creativeModeTab : CreativeModeTabRegistry.getSortedCreativeModeTabs()) {
             for (ItemStack itemStack : creativeModeTab.getDisplayItems()) {
-                ResourceLocation key = ForgeRegistries.ITEMS.getKey(itemStack.getItem());
                 tasks.set(tasks.get() + 1);
-                String subKey = key + (itemStack.hasTag() ? "__" + serializeNbtTag(itemStack.getTag()) : "");
+                String baseFilename = ImageExportUtil.genBaseFilenameFromItem(itemStack);
                 exportTasks.add((guiGraphics) -> {
                     taskProcessed.set(taskProcessed.get() + 1);
                     signalStatus(tasks, taskProcessed);
                     guiGraphics.fill(0, 0, scaleModifiedRounded, scaleModifiedRounded, BACKGROUND_COLOR);
                     ItemRenderUtil.renderItem(guiGraphics, itemStack, scaleModified);
-                    ImageExportUtil.exportImageFromScreenshot(baseDir, subKey, this.scaleImage, BACKGROUND_COLOR_SHIFTED);
+                    ImageExportUtil.exportImageFromScreenshot(baseDir, baseFilename, this.scaleImage, BACKGROUND_COLOR_SHIFTED);
                     if (itemStack.hasTag() && GeneralConfig.fileNameHashTag) {
-                        ImageExportUtil.exportNbtFile(baseDir, subKey, itemStack.getTag());
+                        ImageExportUtil.exportNbtFile(baseDir, baseFilename, itemStack.getTag());
                     }
                 });
             }

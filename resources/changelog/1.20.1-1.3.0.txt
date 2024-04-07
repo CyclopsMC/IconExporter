@@ -1,0 +1,9 @@
+As always, don't forget to backup your world before updating!
+Requires CyclopsCore version 1.18.14 or higher.
+
+Additions:
+* Add `exportmetadata` command, Closes #6
+
+Fixes:
+* Fix crash when exporting items with slashes in key, Closes #26
+

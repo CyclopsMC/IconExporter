@@ -3,5 +3,6 @@
   "gui.itemexporter.name": "Icon Exporter",
   "gui.itemexporter.finished": "Finished exporting",
   "gui.itemexporter.error": "Error while exporting",
-  "gui.itemexporter.status": "Rendering %s / %s"
+  "gui.itemexporter.status": "Rendering %s / %s",
+  "gui.itemexporter.metadata_export.success": "Exported metadata file to %s"
 }

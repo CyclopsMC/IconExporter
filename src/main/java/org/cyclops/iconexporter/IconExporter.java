@@ -10,6 +10,7 @@ import org.cyclops.cyclopscore.init.ModBaseVersionable;
 import org.cyclops.cyclopscore.proxy.IClientProxy;
 import org.cyclops.cyclopscore.proxy.ICommonProxy;
 import org.cyclops.iconexporter.command.CommandExport;
+import org.cyclops.iconexporter.command.CommandExportMetadata;
 import org.cyclops.iconexporter.proxy.ClientProxy;
 import org.cyclops.iconexporter.proxy.CommonProxy;
 
@@ -36,6 +37,7 @@ public class IconExporter extends ModBaseVersionable<IconExporter> {
 
         if (FMLEnvironment.dist.isClient()) {
             root.then(CommandExport.make());
+            root.then(CommandExportMetadata.make());
         }
 
         return root;

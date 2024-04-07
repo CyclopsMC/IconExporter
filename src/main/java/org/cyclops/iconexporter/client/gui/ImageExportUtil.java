@@ -1,10 +1,10 @@
 package org.cyclops.iconexporter.client.gui;
 
 import com.google.common.base.Charsets;
-import net.minecraft.client.Minecraft;
 import com.mojang.blaze3d.platform.NativeImage;
-import net.minecraft.nbt.Tag;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.Screenshot;
+import net.minecraft.nbt.Tag;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.material.Fluid;
@@ -25,13 +25,19 @@ import java.io.IOException;
  */
 public class ImageExportUtil {
 
+   public static String escapeKey(String key) {
+       return key
+               .replaceAll(":", "__")
+               .replaceAll("\"", "'")
+               .replaceAll("/", "___");
+   }
+
     public static String genBaseFilenameFromFluid(ResourceKey<Fluid> fluid) {
-        StringBuffer sb = new StringBuffer("fluid__");
-        sb.append(fluid.location());
-        return sb.toString().replaceAll(":", "__").replaceAll("\"", "'");
+        return escapeKey("fluid__" + fluid.location());
     }
+
     public static String genBaseFilenameFromItem(ItemStack itemStack) {
-        StringBuffer sb = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
         sb.append(ForgeRegistries.ITEMS.getKey(itemStack.getItem()));
         if(itemStack.hasTag()) {
             sb.append("__");
@@ -41,7 +47,7 @@ public class ImageExportUtil {
                 sb.append(itemStack.getTag());
             }
         }
-        return sb.toString().replaceAll(":", "__").replaceAll("\"", "'");
+        return escapeKey(sb.toString());
     }
 
     public static void exportImageFromScreenshot(File dir, String baseFilename, int scaleImage, int backgroundColor) throws IOException {

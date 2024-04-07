@@ -3,6 +3,7 @@ package org.cyclops.iconexporter.command;
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
@@ -36,6 +37,7 @@ public class CommandExportMetadata implements Command<CommandSourceStack> {
 
     @Override
     public int run(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
+        Gson gson = new Gson();
         JsonArray jsonMeta = new JsonArray();
 
         // Add items
@@ -50,6 +52,9 @@ public class CommandExportMetadata implements Command<CommandSourceStack> {
                 obj.addProperty("image_file", ImageExportUtil.genBaseFilenameFromItem(itemStack)+".png");
                 obj.addProperty("local_name", itemStack.getHoverName().getString());
                 obj.addProperty("id", ForgeRegistries.ITEMS.getKey(itemStack.getItem()).toString());
+                if (itemStack.hasTag()) {
+                    obj.add("nbt", JsonParser.parseString(itemStack.getTag().toString()));
+                }
                 obj.addProperty("type", "item");
                 jsonMeta.add(obj);
             }
@@ -69,7 +74,7 @@ public class CommandExportMetadata implements Command<CommandSourceStack> {
         json.add("meta", jsonMeta);
 
         // save the file
-        String jsonString = new Gson().toJson(json);
+        String jsonString = gson.toJson(json);
         File f = new File(Minecraft.getInstance().gameDirectory, "icon-exports-metadata.json");
         try {
             FileWriter writer = new FileWriter(f);

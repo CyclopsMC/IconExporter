@@ -35,6 +35,27 @@ public class CommandExportMetadata implements Command<CommandSourceStack> {
 
     public CommandExportMetadata() {}
 
+    private static JsonObject itemToJson(ItemStack itemStack) {
+        JsonObject obj = new JsonObject();
+        obj.addProperty("image_file", ImageExportUtil.genBaseFilenameFromItem(itemStack)+".png");
+        obj.addProperty("local_name", itemStack.getHoverName().getString());
+        obj.addProperty("id", ForgeRegistries.ITEMS.getKey(itemStack.getItem()).toString());
+        if (itemStack.hasTag()) {
+            obj.add("nbt", JsonParser.parseString(itemStack.getTag().toString()));
+        }
+        obj.addProperty("type", "item");
+        return obj;
+    }
+
+    private static JsonObject fluidToJson(Map.Entry<ResourceKey<Fluid>, Fluid> fluidEntry) {
+        JsonObject obj = new JsonObject();
+        obj.addProperty("image_file", ImageExportUtil.genBaseFilenameFromFluid(fluidEntry.getKey())+".png");
+        obj.addProperty("local_name", fluidEntry.getValue().getFluidType().getDescription().getString());
+        obj.addProperty("id", fluidEntry.getKey().location().toString());
+        obj.addProperty("type", "fluid");
+        return obj;
+    }
+
     @Override
     public int run(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
         Gson gson = new Gson();
@@ -48,26 +69,23 @@ public class CommandExportMetadata implements Command<CommandSourceStack> {
         );
         for (CreativeModeTab creativeModeTab : CreativeModeTabRegistry.getSortedCreativeModeTabs()) {
             for (ItemStack itemStack : creativeModeTab.getDisplayItems()) {
-                JsonObject obj = new JsonObject();
-                obj.addProperty("image_file", ImageExportUtil.genBaseFilenameFromItem(itemStack)+".png");
-                obj.addProperty("local_name", itemStack.getHoverName().getString());
-                obj.addProperty("id", ForgeRegistries.ITEMS.getKey(itemStack.getItem()).toString());
-                if (itemStack.hasTag()) {
-                    obj.add("nbt", JsonParser.parseString(itemStack.getTag().toString()));
+                try {
+                    jsonMeta.add(itemToJson(itemStack));
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    Minecraft.getInstance().player.sendSystemMessage(Component.translatable("gui.itemexporter.error"));
                 }
-                obj.addProperty("type", "item");
-                jsonMeta.add(obj);
             }
         }
 
         // Add fluids
         for (Map.Entry<ResourceKey<Fluid>, Fluid> fluidEntry : ForgeRegistries.FLUIDS.getEntries()) {
-            JsonObject obj = new JsonObject();
-            obj.addProperty("image_file", ImageExportUtil.genBaseFilenameFromFluid(fluidEntry.getKey())+".png");
-            obj.addProperty("local_name", fluidEntry.getValue().getFluidType().getDescription().getString());
-            obj.addProperty("id", fluidEntry.getKey().location().toString());
-            obj.addProperty("type", "fluid");
-            jsonMeta.add(obj);
+            try {
+                jsonMeta.add(fluidToJson(fluidEntry));
+            } catch (Exception e) {
+                e.printStackTrace();
+                Minecraft.getInstance().player.sendSystemMessage(Component.translatable("gui.itemexporter.error"));
+            }
         }
 
         JsonObject json = new JsonObject();

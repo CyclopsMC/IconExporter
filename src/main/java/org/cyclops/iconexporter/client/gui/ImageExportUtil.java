@@ -1,14 +1,14 @@
 package org.cyclops.iconexporter.client.gui;
 
 import com.google.common.base.Charsets;
-import net.minecraft.client.Minecraft;
 import com.mojang.blaze3d.platform.NativeImage;
-import net.minecraft.nbt.Tag;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.Screenshot;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.nbt.Tag;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.material.Fluid;
-import net.minecraftforge.registries.ForgeRegistries;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.logging.log4j.Level;
@@ -32,7 +32,7 @@ public class ImageExportUtil {
     }
     public static String genBaseFilenameFromItem(ItemStack itemStack) {
         StringBuffer sb = new StringBuffer();
-        sb.append(ForgeRegistries.ITEMS.getKey(itemStack.getItem()));
+        sb.append(BuiltInRegistries.ITEM.getKey(itemStack.getItem()));
         if(itemStack.hasTag()) {
             sb.append("__");
             if (GeneralConfig.fileNameHashTag) {

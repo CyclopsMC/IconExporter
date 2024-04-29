@@ -2,8 +2,9 @@ package org.cyclops.iconexporter;
 
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import net.minecraft.commands.CommandSourceStack;
-import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.loading.FMLEnvironment;
+import net.neoforged.bus.api.IEventBus;
+import net.neoforged.fml.common.Mod;
+import net.neoforged.fml.loading.FMLEnvironment;
 import org.apache.logging.log4j.Level;
 import org.cyclops.cyclopscore.config.ConfigHandler;
 import org.cyclops.cyclopscore.init.ModBaseVersionable;
@@ -27,8 +28,8 @@ public class IconExporter extends ModBaseVersionable<IconExporter> {
      */
     public static IconExporter _instance;
 
-    public IconExporter() {
-        super(Reference.MOD_ID, (instance) -> _instance = instance);
+    public IconExporter(IEventBus modEventBus) {
+        super(Reference.MOD_ID, (instance) -> _instance = instance, modEventBus);
     }
 
     @Override

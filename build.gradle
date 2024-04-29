@@ -1,15 +1,14 @@
 plugins {
-    id 'net.minecraftforge.gradle' version '[6.0,6.2)'
-    id 'com.matthewprenger.cursegradle' version '1.4.0'
+	id 'net.neoforged.gradle.userdev' version '7.0.97'
+    id 'net.darkhax.curseforgegradle' version '1.0.8'
     id 'com.diffplug.spotless' version '5.14.3'
 	id 'com.modrinth.minotaur' version '2.+'
 }
 
-apply plugin: 'net.minecraftforge.gradle'
 apply plugin: 'idea'
 apply plugin: 'maven-publish'
 
-import net.minecraftforge.gradle.common.tasks.SignJar
+import net.neoforged.gradle.common.tasks.PotentiallySignJar
 
 // Determine build number
 String build_number = "DEV" // this will be referenced as simply build_number from now on.
@@ -26,7 +25,10 @@ logger.lifecycle "BUILDING VERSION: " + build_number
 // Set mod details
 version = project.mod_version
 group = "org.cyclops.iconexporter"
-archivesBaseName = "IconExporter"
+archivesBaseName = "IconExporter-${project.minecraft_version}-neoforge"
+base {
+    archivesName = archivesBaseName
+}
 
 // Set Java details
 java.toolchain.languageVersion = JavaLanguageVersion.of(17)
@@ -47,6 +49,7 @@ sourceSets {
     main
     test
 }
+sourceSets.main.resources { srcDir 'src/generated/resources' }
 
 repositories {
     mavenCentral()
@@ -55,20 +58,20 @@ repositories {
         name "Cyclops Repo"
         url "https://maven.pkg.github.com/CyclopsMC/packages"
         credentials {
-            username = project.findProperty("gpr.user") ?: System.getenv("MAVEN_USERNAME")
-            password = project.findProperty("gpr.key") ?: System.getenv("MAVEN_KEY")
+            username = project.findProperty("gpr.user") ?: System.getenv("MAVEN_USERNAME") ?: System.getenv("GITHUB_USER")
+            password = project.findProperty("gpr.key") ?: System.getenv("MAVEN_KEY") ?: System.getenv("GITHUB_TOKEN")
         }
     }
 }
 
 dependencies {
-    minecraft "net.minecraftforge:forge:${project.minecraft_version}-${project.forge_version}"
+    implementation "net.neoforged:neoforge:${project.neoforge_version}"
 
     // Add something like 'cyclopscore_version_local=0.1.0-DEV' to your secrets.properties if you want to use a custom local CyclopsCore version.
     if (secrets.cyclopscore_version_local) {
-        implementation "org.cyclops.cyclopscore:cyclopscore:${project.minecraft_version}-${secrets.cyclopscore_version_local}:deobf"
+        implementation "org.cyclops.cyclopscore:cyclopscore-${project.minecraft_version}-neoforge:${secrets.cyclopscore_version_local}:deobf"
     } else {
-        implementation "org.cyclops.cyclopscore:cyclopscore:${project.minecraft_version}-${project.cyclopscore_version}:deobf"
+        implementation "org.cyclops.cyclopscore:cyclopscore-${project.minecraft_version}-neoforge:${project.cyclopscore_version}:deobf"
     }
 
     // Project lombok
@@ -79,49 +82,41 @@ dependencies {
 }
 
 minecraft {
-    mappings channel: "official", version: "${project.minecraft_version}"
+    accessTransformers {
+        file('src/main/resources/META-INF/accesstransformer.cfg')
+    }
+}
 
-    accessTransformer = file('src/main/resources/META-INF/accesstransformer.cfg')
+runs {
+    configureEach {
+		systemProperty 'forge.logging.markers', 'REGISTRIES'
+        systemProperty 'forge.logging.console.level', 'debug'
+        systemProperty 'forge.logging.console.level', 'debug'
+        modSource project.sourceSets.main
+    }
+	
+    client {
+        systemProperty 'forge.enabledGameTestNamespaces', project.mod_id
+    }
 
-    runs {
-        client {
-            workingDirectory project.file('run')
-            //property 'forge.logging.markers', 'REGISTRIES,REGISTRYDUMP'
-            property 'forge.logging.console.level', 'debug'
-            mods {
-                iconexporter {
-                    source sourceSets.main
-                }
-            }
-        }
+    server {
+        systemProperty 'forge.enabledGameTestNamespaces', project.mod_id
+        programArgument '--nogui'
+    }
 
-        server {
-            workingDirectory project.file('run')
-            property 'forge.logging.console.level', 'debug'
-            mods {
-                iconexporter {
-                    source sourceSets.main
-                }
-            }
-        }
+    gameTestServer {
+        systemProperty 'forge.enabledGameTestNamespaces', project.mod_id
+    }
 
-        data {
-            workingDirectory project.file('run')
-            property 'forge.logging.console.level', 'debug'
-            args '--mod', 'iconexporter', '--all', '--output', file('src/generated/resources/')
-            mods {
-                iconexporter {
-                    source sourceSets.main
-                }
-            }
-        }
+    data {
+        programArguments.addAll '--mod', project.mod_id, '--all', '--output', file('src/generated/resources/').getAbsolutePath(), '--existing', file('src/main/resources/').getAbsolutePath()
     }
 }
 
 if (build_number.equals("RELEASE"))
-    version = "${project.minecraft_version}-${project.mod_version}"
+    version = "${project.mod_version}"
 else
-    version = "${project.minecraft_version}-${project.mod_version}-${build_number}"
+    version = "${project.mod_version}-${build_number}"
 
 jar {
     manifest {
@@ -137,7 +132,6 @@ jar {
         ])
     }
 }
-jar.finalizedBy('reobfJar')
 
 javadoc {
     source = [sourceSets.main.allJava]
@@ -145,7 +139,9 @@ javadoc {
     options.addStringOption('Xdoclint:accessibility,html,reference,syntax', '-quiet')
 }
 
-task signJar(type: SignJar, dependsOn: jar) {
+task signJar(type: PotentiallySignJar, dependsOn: jar) {
+	dependsOn(tasks.jar)
+
     onlyIf {
         System.getenv().SIGN_KEYSTORE
     }
@@ -154,10 +150,9 @@ task signJar(type: SignJar, dependsOn: jar) {
     alias = System.getenv().SIGN_ALIAS
     storePass = System.getenv().SIGN_STOREPASS
     keyPass = System.getenv().SIGN_KEYPASS
-    inputFile = jar.archivePath
-    outputFile = jar.archivePath
+    input = jar.archivePath
+    output = jar.archivePath
 }
-build.dependsOn signJar
 
 task deobfJar(type: Jar) {
     from sourceSets.main.output
@@ -202,32 +197,28 @@ artifacts {
     archives javadocJar
 }
 
-curseforge {
-    if(secrets.curseforge_key) {
-        apiKey = secrets.curseforge_key
+task publishCurseForge(type: net.darkhax.curseforgegradle.TaskPublishCurseForge) {
+    dependsOn(tasks.jar)
+
+    if(secrets.hasProperty("curseforge_key") && secrets.hasProperty("changelog")) {
+        apiToken = secrets.curseforge_key
     } else if(System.getenv().GITHUB_ACTIONS && System.getenv().CURSEFORGE_KEY_SECRET) {
-        apiKey = System.getenv().CURSEFORGE_KEY_SECRET
+        apiToken = System.getenv().CURSEFORGE_KEY_SECRET
+    } else {
+        apiToken = "DUMMY"
     }
 
-    project {
-        id = "327048" // my project url is http://minecraft.curseforge.com/mc-mods/327048/
-        releaseType = project.project.release_type
-		addGameVersion project.minecraft_version
-        mainArtifact(jar) {
-            relations {
-                requiredDependency 'cyclops-core'
-            }
-        }
+    def projectId = "327048" // my project url is http://minecraft.curseforge.com/mc-mods/327048/
 
-        changelog = ""
-        if (new File("resources/changelog/${project.version}.txt").exists()) {
-            changelog = new File("resources/changelog/${project.version}.txt").text
-        }
-
-        addArtifact deobfJar
-        addArtifact sourcesJar
-        addArtifact javadocJar
+    def mainFile = upload(projectId, jar)
+	mainFile.changelogType = "text"
+    if (new File("resources/changelog/${project.version}.txt").exists()) {
+        mainFile.changelog = file("resources/changelog/${project.version}.txt")
     }
+	mainFile.addGameVersion(project.minecraft_version)
+	mainFile.addModLoader("NeoForge")
+
+	mainFile.addRequirement('cyclops-core')
 }
 
 modrinth {
@@ -309,3 +300,7 @@ tasks.register('updateGitHooks', Copy) {
     into './.git/hooks'
 }
 compileJava.dependsOn updateGitHooks
+
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = 'UTF-8' // Use the UTF-8 charset for Java compilation
+}

@@ -1,5 +1,5 @@
 modLoader="javafml"
-loaderVersion="[47,)"
+loaderVersion="[2,)"
 issueTrackerURL="https://github.com/CyclopsMC/IconExporter/issues"
 displayURL="https://www.curseforge.com/minecraft/mc-mods/iconexporter"
 license="MIT"
@@ -14,21 +14,23 @@ updateJSONURL="https://raw.githubusercontent.com/CyclopsMC/Versions/master/forge
 description='''
 Exports item and block icons to files.
 '''
+[[accessTransformers]]
+    file="META-INF/accesstransformer.cfg"
 [[dependencies.iconexporter]]
     modId="cyclopscore"
-    mandatory=true
-    versionRange="[1.18.4,)"
+    type="required"
+    versionRange="[1.19.0,)"
     ordering="NONE"
     side="BOTH"
 [[dependencies.iconexporter]]
-    modId="forge"
-    mandatory=true
-    versionRange="[47.0.1,)"
+    modId="neoforge"
+    type="required"
+    versionRange="[20.4,)"
     ordering="NONE"
     side="BOTH"
 [[dependencies.iconexporter]]
     modId="minecraft"
-    mandatory=true
-    versionRange="[1.20.1,]"
+    type="required"
+    versionRange="[1.20.4,]"
     ordering="NONE"
     side="BOTH"

@@ -11,14 +11,14 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.minecraft.client.Minecraft;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.material.Fluid;
-import net.minecraftforge.common.CreativeModeTabRegistry;
-import net.minecraftforge.registries.ForgeRegistries;
+import net.neoforged.neoforge.common.CreativeModeTabRegistry;
 import org.cyclops.iconexporter.client.gui.ImageExportUtil;
 
 import java.io.File;
@@ -39,7 +39,7 @@ public class CommandExportMetadata implements Command<CommandSourceStack> {
         JsonObject obj = new JsonObject();
         obj.addProperty("image_file", ImageExportUtil.genBaseFilenameFromItem(itemStack)+".png");
         obj.addProperty("local_name", itemStack.getHoverName().getString());
-        obj.addProperty("id", ForgeRegistries.ITEMS.getKey(itemStack.getItem()).toString());
+        obj.addProperty("id", BuiltInRegistries.ITEM.getKey(itemStack.getItem()).toString());
         if (itemStack.hasTag()) {
             obj.add("nbt", JsonParser.parseString(itemStack.getTag().toString()));
         }
@@ -79,7 +79,7 @@ public class CommandExportMetadata implements Command<CommandSourceStack> {
         }
 
         // Add fluids
-        for (Map.Entry<ResourceKey<Fluid>, Fluid> fluidEntry : ForgeRegistries.FLUIDS.getEntries()) {
+        for (Map.Entry<ResourceKey<Fluid>, Fluid> fluidEntry : BuiltInRegistries.FLUID.entrySet()) {
             try {
                 jsonMeta.add(fluidToJson(fluidEntry));
             } catch (Exception e) {

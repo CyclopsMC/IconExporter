@@ -4,6 +4,7 @@ import com.google.common.collect.Queues;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
@@ -11,8 +12,7 @@ import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.material.Fluid;
-import net.minecraftforge.common.CreativeModeTabRegistry;
-import net.minecraftforge.registries.ForgeRegistries;
+import net.neoforged.neoforge.common.CreativeModeTabRegistry;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.cyclops.cyclopscore.datastructure.Wrapper;
 import org.cyclops.cyclopscore.helper.Helpers;
@@ -88,7 +88,7 @@ public class ScreenIconExporter extends Screen {
         Queue<IExportTask> exportTasks = Queues.newArrayDeque();
 
         // Add fluids
-        for (Map.Entry<ResourceKey<Fluid>, Fluid> fluidEntry : ForgeRegistries.FLUIDS.getEntries()) {
+        for (Map.Entry<ResourceKey<Fluid>, Fluid> fluidEntry : BuiltInRegistries.FLUID.entrySet()) {
             tasks.set(tasks.get() + 1);
             String baseFilename = ImageExportUtil.genBaseFilenameFromFluid(fluidEntry.getKey());
             exportTasks.add((guiGraphics) -> {

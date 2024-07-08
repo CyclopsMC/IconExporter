@@ -4,8 +4,9 @@ import com.google.common.base.Charsets;
 import com.mojang.blaze3d.platform.NativeImage;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.Screenshot;
+import net.minecraft.core.HolderLookup;
+import net.minecraft.core.component.DataComponentPatch;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.nbt.Tag;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.material.Fluid;
@@ -36,15 +37,21 @@ public class ImageExportUtil {
         return escapeKey("fluid__" + fluid.location());
     }
 
-    public static String genBaseFilenameFromItem(ItemStack itemStack) {
+    public static String genBaseFilenameFromItem(HolderLookup.Provider lookupProvider, ItemStack itemStack) {
         StringBuilder sb = new StringBuilder();
         sb.append(BuiltInRegistries.ITEM.getKey(itemStack.getItem()));
-        if(itemStack.hasTag()) {
+        String componentsString = "{}";
+        try {
+            componentsString = IconExporter.componentsToString(lookupProvider, itemStack.getComponentsPatch());
+        } catch (IllegalStateException e) {
+            IconExporter.clog(e.getMessage());
+        }
+        if(!"{}".equals(componentsString)) {
             sb.append("__");
-            if (GeneralConfig.fileNameHashTag) {
-                sb.append(DigestUtils.md5Hex(itemStack.getTag().toString()));
+            if (GeneralConfig.fileNameHashComponents) {
+                sb.append(DigestUtils.md5Hex(componentsString));
             } else {
-                sb.append(itemStack.getTag());
+                sb.append(componentsString);
             }
         }
         return escapeKey(sb.toString());
@@ -88,12 +95,12 @@ public class ImageExportUtil {
         }
     }
 
-    public static void exportNbtFile(File dir, String baseFilename, Tag tag) throws IOException {
+    public static void exportNbtFile(HolderLookup.Provider lookupProvider, File dir, String baseFilename, DataComponentPatch components) throws IOException {
         // Write the file
         try {
             File file = new File(dir, baseFilename + ".txt").getCanonicalFile();
             try {
-                FileUtils.writeStringToFile(file, tag.toString(), Charsets.UTF_8);
+                FileUtils.writeStringToFile(file, IconExporter.componentsToString(lookupProvider, components), Charsets.UTF_8);
             } catch (NullPointerException e) {
                 e.printStackTrace();
                 throw new IOException("Error while writing the TXT image " + file);

@@ -1,7 +1,12 @@
 package org.cyclops.iconexporter;
 
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
+import net.minecraft.commands.CommandBuildContext;
 import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.commands.Commands;
+import net.minecraft.core.HolderLookup;
+import net.minecraft.core.component.DataComponentPatch;
+import net.minecraft.nbt.NbtOps;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.loading.FMLEnvironment;
@@ -32,13 +37,17 @@ public class IconExporter extends ModBaseVersionable<IconExporter> {
         super(Reference.MOD_ID, (instance) -> _instance = instance, modEventBus);
     }
 
+    public static String componentsToString(HolderLookup.Provider lookupProvider, DataComponentPatch components) {
+        return DataComponentPatch.CODEC.encodeStart(lookupProvider.createSerializationContext(NbtOps.INSTANCE), components).getOrThrow().toString();
+    }
+
     @Override
-    protected LiteralArgumentBuilder<CommandSourceStack> constructBaseCommand() {
-        LiteralArgumentBuilder<CommandSourceStack> root = super.constructBaseCommand();
+    protected LiteralArgumentBuilder<CommandSourceStack> constructBaseCommand(Commands.CommandSelection selection, CommandBuildContext context) {
+        LiteralArgumentBuilder<CommandSourceStack> root = super.constructBaseCommand(selection, context);
 
         if (FMLEnvironment.dist.isClient()) {
-            root.then(CommandExport.make());
-            root.then(CommandExportMetadata.make());
+            root.then(CommandExport.make(context));
+            root.then(CommandExportMetadata.make(context));
         }
 
         return root;

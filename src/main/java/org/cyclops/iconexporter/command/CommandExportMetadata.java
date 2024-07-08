@@ -9,8 +9,10 @@ import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.minecraft.client.Minecraft;
+import net.minecraft.commands.CommandBuildContext;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
@@ -19,6 +21,7 @@ import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.material.Fluid;
 import net.neoforged.neoforge.common.CreativeModeTabRegistry;
+import org.cyclops.iconexporter.IconExporter;
 import org.cyclops.iconexporter.client.gui.ImageExportUtil;
 
 import java.io.File;
@@ -33,15 +36,25 @@ import java.util.Map;
  */
 public class CommandExportMetadata implements Command<CommandSourceStack> {
 
-    public CommandExportMetadata() {}
+    private final CommandBuildContext context;
 
-    private static JsonObject itemToJson(ItemStack itemStack) {
+    public CommandExportMetadata(CommandBuildContext context) {
+        this.context = context;
+    }
+
+    private static JsonObject itemToJson(HolderLookup.Provider lookupProvider, ItemStack itemStack) {
         JsonObject obj = new JsonObject();
-        obj.addProperty("image_file", ImageExportUtil.genBaseFilenameFromItem(itemStack)+".png");
+        obj.addProperty("image_file", ImageExportUtil.genBaseFilenameFromItem(lookupProvider, itemStack)+".png");
         obj.addProperty("local_name", itemStack.getHoverName().getString());
         obj.addProperty("id", BuiltInRegistries.ITEM.getKey(itemStack.getItem()).toString());
-        if (itemStack.hasTag()) {
-            obj.add("nbt", JsonParser.parseString(itemStack.getTag().toString()));
+        String componentsString = "{}";
+        try {
+            componentsString = IconExporter.componentsToString(lookupProvider, itemStack.getComponentsPatch());
+        } catch (IllegalStateException e) {
+            IconExporter.clog(e.getMessage());
+        }
+        if(!"{}".equals(componentsString)) {
+            obj.add("components", JsonParser.parseString(componentsString));
         }
         obj.addProperty("type", "item");
         return obj;
@@ -70,7 +83,7 @@ public class CommandExportMetadata implements Command<CommandSourceStack> {
         for (CreativeModeTab creativeModeTab : CreativeModeTabRegistry.getSortedCreativeModeTabs()) {
             for (ItemStack itemStack : creativeModeTab.getDisplayItems()) {
                 try {
-                    jsonMeta.add(itemToJson(itemStack));
+                    jsonMeta.add(itemToJson(this.context, itemStack));
                 } catch (Exception e) {
                     e.printStackTrace();
                     Minecraft.getInstance().player.sendSystemMessage(Component.translatable("gui.itemexporter.error"));
@@ -107,9 +120,9 @@ public class CommandExportMetadata implements Command<CommandSourceStack> {
         return 0;
     }
 
-    public static LiteralArgumentBuilder<CommandSourceStack> make() {
+    public static LiteralArgumentBuilder<CommandSourceStack> make(CommandBuildContext context) {
         return Commands.literal("exportmetadata")
-                .executes(new CommandExportMetadata());
+                .executes(new CommandExportMetadata(context));
     }
 
 }

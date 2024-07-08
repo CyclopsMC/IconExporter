@@ -29,8 +29,8 @@ public class GeneralConfig extends DummyConfig {
     @ConfigurableProperty(category = "core", comment = "The default image width in px to render at.", isCommandable = true, configLocation = ModConfig.Type.CLIENT)
     public static int defaultScale = 32;
 
-    @ConfigurableProperty(category = "core", comment = "If the NBT tag should be hashed with MD5 when constructing the file name, and if an auxiliary txt file should be created with the full tag contents.", isCommandable = true)
-    public static boolean fileNameHashTag = false;
+    @ConfigurableProperty(category = "core", comment = "If the components should be hashed with MD5 when constructing the file name, and if an auxiliary txt file should be created with the full components contents.", isCommandable = true)
+    public static boolean fileNameHashComponents = false;
 
     public GeneralConfig() {
         super(IconExporter._instance, "general");

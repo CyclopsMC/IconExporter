@@ -46,7 +46,7 @@ public class ItemRenderUtil {
         p_275246_.scale(scale / 16, scale / 16, 1);
         p_275246_.translate((float)p_275214_, (float)p_275658_, 100.0F);
         p_275246_.translate(8.0F, 8.0F, 0.0F);
-        p_275246_.mulPoseMatrix((new Matrix4f()).scaling(1.0F, -1.0F, 1.0F));
+        p_275246_.mulPose((new Matrix4f()).scaling(1.0F, -1.0F, 1.0F));
         p_275246_.scale(16.0F, 16.0F, 16.0F);
         MultiBufferSource.BufferSource multibuffersource$buffersource = Minecraft.getInstance().renderBuffers().bufferSource();
         boolean flag = !p_275740_.usesBlockLight();
@@ -54,11 +54,10 @@ public class ItemRenderUtil {
             Lighting.setupForFlatItems();
         }
 
-        PoseStack posestack = RenderSystem.getModelViewStack();
+        PoseStack posestack = p_275246_;
         posestack.pushPose();
-        posestack.mulPoseMatrix(p_275246_.last().pose());
         RenderSystem.applyModelViewMatrix();
-        Minecraft.getInstance().getItemRenderer().render(p_275195_, ItemDisplayContext.GUI, false, new PoseStack(), multibuffersource$buffersource, 15728880, OverlayTexture.NO_OVERLAY, p_275740_);
+        Minecraft.getInstance().getItemRenderer().render(p_275195_, ItemDisplayContext.GUI, false, posestack, multibuffersource$buffersource, 15728880, OverlayTexture.NO_OVERLAY, p_275740_);
         multibuffersource$buffersource.endBatch();
         RenderSystem.enableDepthTest();
         if (flag) {

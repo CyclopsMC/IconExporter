@@ -6,6 +6,7 @@ import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.minecraft.client.Minecraft;
+import net.minecraft.commands.CommandBuildContext;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import org.cyclops.iconexporter.GeneralConfig;
@@ -18,9 +19,11 @@ import org.cyclops.iconexporter.client.gui.ScreenIconExporter;
  */
 public class CommandExport implements Command<CommandSourceStack> {
 
+    private final CommandBuildContext context;
     private final boolean param;
 
-    public CommandExport(boolean param) {
+    public CommandExport(CommandBuildContext context, boolean param) {
+        this.context = context;
         this.param = param;
     }
 
@@ -33,17 +36,17 @@ public class CommandExport implements Command<CommandSourceStack> {
         }
 
         // Open the gui that will render the icons
-        ScreenIconExporter exporter = new ScreenIconExporter(scale, Minecraft.getInstance().getWindow().getGuiScale());
+        ScreenIconExporter exporter = new ScreenIconExporter(this.context, scale, Minecraft.getInstance().getWindow().getGuiScale());
         Minecraft.getInstance().submitAsync(() -> Minecraft.getInstance().setScreen(exporter));
 
         return 0;
     }
 
-    public static LiteralArgumentBuilder<CommandSourceStack> make() {
+    public static LiteralArgumentBuilder<CommandSourceStack> make(CommandBuildContext context) {
         return Commands.literal("export")
-                .executes(new CommandExport(false))
+                .executes(new CommandExport(context, false))
                 .then(Commands.argument("scale", IntegerArgumentType.integer(1))
-                        .executes(new CommandExport(true)));
+                        .executes(new CommandExport(context, true)));
     }
 
 }

@@ -19,7 +19,7 @@ Exports item and block icons to files.
 [[dependencies.iconexporter]]
     modId="cyclopscore"
     type="required"
-    versionRange="[1.19.10,)"
+    versionRange="[1.19.11,)"
     ordering="NONE"
     side="BOTH"
 [[dependencies.iconexporter]]

@@ -20,9 +20,9 @@ import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.material.Fluid;
-import net.neoforged.neoforge.common.CreativeModeTabRegistry;
-import org.cyclops.iconexporter.IconExporter;
+import org.cyclops.cyclopscore.init.IModBase;
 import org.cyclops.iconexporter.client.gui.ImageExportUtil;
+import org.cyclops.iconexporter.helpers.IIconExporterHelpers;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -37,21 +37,25 @@ import java.util.Map;
 public class CommandExportMetadata implements Command<CommandSourceStack> {
 
     private final CommandBuildContext context;
+    private final IModBase mod;
+    private final IIconExporterHelpers helpers;
 
-    public CommandExportMetadata(CommandBuildContext context) {
+    public CommandExportMetadata(CommandBuildContext context, IModBase mod, IIconExporterHelpers helpers) {
         this.context = context;
+        this.mod = mod;
+        this.helpers = helpers;
     }
 
-    private static JsonObject itemToJson(HolderLookup.Provider lookupProvider, ItemStack itemStack) {
+    private JsonObject itemToJson(HolderLookup.Provider lookupProvider, ItemStack itemStack) {
         JsonObject obj = new JsonObject();
-        obj.addProperty("image_file", ImageExportUtil.genBaseFilenameFromItem(lookupProvider, itemStack)+".png");
+        obj.addProperty("image_file", ImageExportUtil.genBaseFilenameFromItem(lookupProvider, itemStack, this.mod, this.helpers)+".png");
         obj.addProperty("local_name", itemStack.getHoverName().getString());
         obj.addProperty("id", BuiltInRegistries.ITEM.getKey(itemStack.getItem()).toString());
         String componentsString = "{}";
         try {
-            componentsString = IconExporter.componentsToString(lookupProvider, itemStack.getComponentsPatch());
+            componentsString = this.helpers.componentsToString(lookupProvider, itemStack.getComponentsPatch());
         } catch (IllegalStateException e) {
-            IconExporter.clog(e.getMessage());
+            this.mod.log(e.getMessage());
         }
         if(!"{}".equals(componentsString)) {
             obj.add("components", JsonParser.parseString(componentsString));
@@ -60,10 +64,10 @@ public class CommandExportMetadata implements Command<CommandSourceStack> {
         return obj;
     }
 
-    private static JsonObject fluidToJson(Map.Entry<ResourceKey<Fluid>, Fluid> fluidEntry) {
+    private JsonObject fluidToJson(Map.Entry<ResourceKey<Fluid>, Fluid> fluidEntry) {
         JsonObject obj = new JsonObject();
         obj.addProperty("image_file", ImageExportUtil.genBaseFilenameFromFluid(fluidEntry.getKey())+".png");
-        obj.addProperty("local_name", fluidEntry.getValue().getFluidType().getDescription().getString());
+        obj.addProperty("local_name", this.helpers.getFluidLocalName(fluidEntry.getValue()));
         obj.addProperty("id", fluidEntry.getKey().location().toString());
         obj.addProperty("type", "fluid");
         return obj;
@@ -80,7 +84,7 @@ public class CommandExportMetadata implements Command<CommandSourceStack> {
                 Minecraft.getInstance().options.operatorItemsTab().get(),
                 Minecraft.getInstance().level.registryAccess()
         );
-        for (CreativeModeTab creativeModeTab : CreativeModeTabRegistry.getSortedCreativeModeTabs()) {
+        for (CreativeModeTab creativeModeTab : this.helpers.getCreativeTabs()) {
             for (ItemStack itemStack : creativeModeTab.getDisplayItems()) {
                 try {
                     jsonMeta.add(itemToJson(this.context, itemStack));
@@ -120,9 +124,9 @@ public class CommandExportMetadata implements Command<CommandSourceStack> {
         return 0;
     }
 
-    public static LiteralArgumentBuilder<CommandSourceStack> make(CommandBuildContext context) {
+    public static LiteralArgumentBuilder<CommandSourceStack> make(CommandBuildContext context, IModBase mod, IIconExporterHelpers helpers) {
         return Commands.literal("exportmetadata")
-                .executes(new CommandExportMetadata(context));
+                .executes(new CommandExportMetadata(context, mod, helpers));
     }
 
 }

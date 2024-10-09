@@ -13,8 +13,9 @@ import net.minecraft.world.level.material.Fluid;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.logging.log4j.Level;
+import org.cyclops.cyclopscore.init.IModBase;
 import org.cyclops.iconexporter.GeneralConfig;
-import org.cyclops.iconexporter.IconExporter;
+import org.cyclops.iconexporter.helpers.IIconExporterHelpers;
 import org.lwjgl.system.MemoryUtil;
 
 import java.io.File;
@@ -37,14 +38,14 @@ public class ImageExportUtil {
         return escapeKey("fluid__" + fluid.location());
     }
 
-    public static String genBaseFilenameFromItem(HolderLookup.Provider lookupProvider, ItemStack itemStack) {
+    public static String genBaseFilenameFromItem(HolderLookup.Provider lookupProvider, ItemStack itemStack, IModBase mod, IIconExporterHelpers helpers) {
         StringBuilder sb = new StringBuilder();
         sb.append(BuiltInRegistries.ITEM.getKey(itemStack.getItem()));
         String componentsString = "{}";
         try {
-            componentsString = IconExporter.componentsToString(lookupProvider, itemStack.getComponentsPatch());
+            componentsString = helpers.componentsToString(lookupProvider, itemStack.getComponentsPatch());
         } catch (IllegalStateException e) {
-            IconExporter.clog(e.getMessage());
+            mod.log(e.getMessage());
         }
         if(!"{}".equals(componentsString)) {
             sb.append("__");
@@ -57,7 +58,7 @@ public class ImageExportUtil {
         return escapeKey(sb.toString());
     }
 
-    public static void exportImageFromScreenshot(File dir, String baseFilename, int scaleImage, int backgroundColor) throws IOException {
+    public static void exportImageFromScreenshot(File dir, String baseFilename, int scaleImage, int backgroundColor, IModBase mod) throws IOException {
         // Take a screenshot
         NativeImage imageFull = Screenshot.takeScreenshot(Minecraft.getInstance().getMainRenderTarget());
         NativeImage image = getSubImage(imageFull, scaleImage, scaleImage);
@@ -88,25 +89,25 @@ public class ImageExportUtil {
                 throw new IOException("Error while writing the PNG image " + file);
             }
         } catch (IOException e) {
-            IconExporter.clog(Level.ERROR, "Error while writing the PNG image for name " + baseFilename);
+            mod.log(Level.ERROR, "Error while writing the PNG image for name " + baseFilename);
             throw e;
         } finally {
             image.close();
         }
     }
 
-    public static void exportNbtFile(HolderLookup.Provider lookupProvider, File dir, String baseFilename, DataComponentPatch components) throws IOException {
+    public static void exportNbtFile(HolderLookup.Provider lookupProvider, File dir, String baseFilename, DataComponentPatch components, IModBase mod, IIconExporterHelpers helpers) throws IOException {
         // Write the file
         try {
             File file = new File(dir, baseFilename + ".txt").getCanonicalFile();
             try {
-                FileUtils.writeStringToFile(file, IconExporter.componentsToString(lookupProvider, components), Charsets.UTF_8);
+                FileUtils.writeStringToFile(file, helpers.componentsToString(lookupProvider, components), Charsets.UTF_8);
             } catch (NullPointerException e) {
                 e.printStackTrace();
                 throw new IOException("Error while writing the TXT image " + file);
             }
         } catch (IOException e) {
-            IconExporter.clog(Level.ERROR, "Error while writing the TXT image for name " + baseFilename);
+            mod.log(Level.ERROR, "Error while writing the TXT image for name " + baseFilename);
             throw e;
         }
     }

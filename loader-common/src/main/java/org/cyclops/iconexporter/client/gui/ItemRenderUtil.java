@@ -13,9 +13,7 @@ import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.material.Fluid;
-import net.neoforged.neoforge.fluids.FluidStack;
-import org.cyclops.cyclopscore.helper.FluidHelpers;
-import org.cyclops.cyclopscore.helper.GuiHelpers;
+import org.cyclops.iconexporter.helpers.IIconExporterHelpers;
 import org.joml.Matrix4f;
 
 /**
@@ -30,9 +28,9 @@ public class ItemRenderUtil {
         Lighting.setupFor3DItems();
     }
 
-    public static void renderFluid(GuiGraphics gui, Fluid fluid, float scale) {
+    public static void renderFluid(GuiGraphics gui, Fluid fluid, float scale, IIconExporterHelpers helpers) {
         gui.pose().scale(scale / 16, scale / 16, scale / 16);
-        GuiHelpers.renderFluidSlot(gui, new FluidStack(fluid, FluidHelpers.BUCKET_VOLUME), 0, 0);
+        helpers.renderFluidSlot(gui, fluid);
     }
 
     // ----- Everything below is modified from ItemRenderer#renderGuiItem (scale param was added) -----

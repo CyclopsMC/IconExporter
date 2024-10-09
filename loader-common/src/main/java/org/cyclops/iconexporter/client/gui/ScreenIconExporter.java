@@ -13,11 +13,12 @@ import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.material.Fluid;
-import net.neoforged.neoforge.common.CreativeModeTabRegistry;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.cyclops.cyclopscore.datastructure.Wrapper;
-import org.cyclops.cyclopscore.helper.Helpers;
+import org.cyclops.cyclopscore.helper.IModHelpers;
+import org.cyclops.cyclopscore.init.IModBase;
 import org.cyclops.iconexporter.GeneralConfig;
+import org.cyclops.iconexporter.helpers.IIconExporterHelpers;
 
 import java.io.File;
 import java.io.IOException;
@@ -34,20 +35,24 @@ import java.util.Queue;
 public class ScreenIconExporter extends Screen {
 
     // (a << 24) | (r << 16) | (g << 8) | b
-    private static final int BACKGROUND_COLOR = Helpers.RGBAToInt(254, 255, 255, 255); // -65537
+    private static final int BACKGROUND_COLOR = IModHelpers.get().getBaseHelpers().RGBAToInt(254, 255, 255, 255); // -65537
     // (a << 24) | (b << 16) | (g << 8) | r
     private static final int BACKGROUND_COLOR_SHIFTED = (255 << 24) | (255 << 16) | (255 << 8) | 254; // For some reason, MC shifts around colors internally... (R seems to be moved from the 16th bit to the 0th bit)
 
     private final HolderLookup.Provider lookupProvider;
     private final int scaleImage;
     private final double scaleGui;
+    private final IModBase mod;
+    private final IIconExporterHelpers helpers;
     private final Queue<IExportTask> exportTasks;
 
-    public ScreenIconExporter(HolderLookup.Provider lookupProvider, int scaleImage, double scaleGui) {
+    public ScreenIconExporter(HolderLookup.Provider lookupProvider, int scaleImage, double scaleGui, IModBase mod, IIconExporterHelpers helpers) {
         super(Component.translatable("gui.itemexporter.name"));
         this.lookupProvider = lookupProvider;
         this.scaleImage = scaleImage;
         this.scaleGui = scaleGui;
+        this.mod = mod;
+        this.helpers = helpers;
         this.exportTasks = this.createExportTasks();
     }
 
@@ -103,8 +108,8 @@ public class ScreenIconExporter extends Screen {
                 taskProcessed.set(taskProcessed.get() + 1);
                 signalStatus(tasks, taskProcessed);
                 guiGraphics.fill(0, 0, scaleModifiedRounded, scaleModifiedRounded, BACKGROUND_COLOR);
-                ItemRenderUtil.renderFluid(guiGraphics, fluidEntry.getValue(), scaleModified);
-                ImageExportUtil.exportImageFromScreenshot(baseDir, baseFilename, this.scaleImage, BACKGROUND_COLOR_SHIFTED);
+                ItemRenderUtil.renderFluid(guiGraphics, fluidEntry.getValue(), scaleModified, this.helpers);
+                ImageExportUtil.exportImageFromScreenshot(baseDir, baseFilename, this.scaleImage, BACKGROUND_COLOR_SHIFTED, this.mod);
             });
         }
 
@@ -114,18 +119,18 @@ public class ScreenIconExporter extends Screen {
                 Minecraft.getInstance().options.operatorItemsTab().get(),
                 Minecraft.getInstance().level.registryAccess()
         );
-        for (CreativeModeTab creativeModeTab : CreativeModeTabRegistry.getSortedCreativeModeTabs()) {
+        for (CreativeModeTab creativeModeTab : this.helpers.getCreativeTabs()) {
             for (ItemStack itemStack : creativeModeTab.getDisplayItems()) {
                 tasks.set(tasks.get() + 1);
-                String baseFilename = ImageExportUtil.genBaseFilenameFromItem(lookupProvider, itemStack);
+                String baseFilename = ImageExportUtil.genBaseFilenameFromItem(lookupProvider, itemStack, this.mod, this.helpers);
                 exportTasks.add((guiGraphics) -> {
                     taskProcessed.set(taskProcessed.get() + 1);
                     signalStatus(tasks, taskProcessed);
                     guiGraphics.fill(0, 0, scaleModifiedRounded, scaleModifiedRounded, BACKGROUND_COLOR);
                     ItemRenderUtil.renderItem(guiGraphics, itemStack, scaleModified);
-                    ImageExportUtil.exportImageFromScreenshot(baseDir, baseFilename, this.scaleImage, BACKGROUND_COLOR_SHIFTED);
+                    ImageExportUtil.exportImageFromScreenshot(baseDir, baseFilename, this.scaleImage, BACKGROUND_COLOR_SHIFTED, this.mod);
                     if (!itemStack.getComponents().isEmpty() && GeneralConfig.fileNameHashComponents) {
-                        ImageExportUtil.exportNbtFile(lookupProvider, baseDir, baseFilename, itemStack.getComponentsPatch());
+                        ImageExportUtil.exportNbtFile(lookupProvider, baseDir, baseFilename, itemStack.getComponentsPatch(), this.mod, this.helpers);
                     }
                 });
             }

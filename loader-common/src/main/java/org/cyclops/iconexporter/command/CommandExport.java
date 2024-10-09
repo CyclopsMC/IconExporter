@@ -9,8 +9,10 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.commands.CommandBuildContext;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
+import org.cyclops.cyclopscore.init.IModBase;
 import org.cyclops.iconexporter.GeneralConfig;
 import org.cyclops.iconexporter.client.gui.ScreenIconExporter;
+import org.cyclops.iconexporter.helpers.IIconExporterHelpers;
 
 /**
  * A command to initiate the exporting process.
@@ -21,10 +23,14 @@ public class CommandExport implements Command<CommandSourceStack> {
 
     private final CommandBuildContext context;
     private final boolean param;
+    private final IModBase mod;
+    private final IIconExporterHelpers helpers;
 
-    public CommandExport(CommandBuildContext context, boolean param) {
+    public CommandExport(CommandBuildContext context, boolean param, IModBase mod, IIconExporterHelpers helpers) {
         this.context = context;
         this.param = param;
+        this.mod = mod;
+        this.helpers = helpers;
     }
 
     @Override
@@ -36,17 +42,17 @@ public class CommandExport implements Command<CommandSourceStack> {
         }
 
         // Open the gui that will render the icons
-        ScreenIconExporter exporter = new ScreenIconExporter(this.context, scale, Minecraft.getInstance().getWindow().getGuiScale());
+        ScreenIconExporter exporter = new ScreenIconExporter(this.context, scale, Minecraft.getInstance().getWindow().getGuiScale(), this.mod, this.helpers);
         Minecraft.getInstance().submitAsync(() -> Minecraft.getInstance().setScreen(exporter));
 
         return 0;
     }
 
-    public static LiteralArgumentBuilder<CommandSourceStack> make(CommandBuildContext context) {
+    public static LiteralArgumentBuilder<CommandSourceStack> make(CommandBuildContext context, IModBase mod, IIconExporterHelpers helpers) {
         return Commands.literal("export")
-                .executes(new CommandExport(context, false))
+                .executes(new CommandExport(context, false, mod, helpers))
                 .then(Commands.argument("scale", IntegerArgumentType.integer(1))
-                        .executes(new CommandExport(context, true)));
+                        .executes(new CommandExport(context, true, mod, helpers)));
     }
 
 }

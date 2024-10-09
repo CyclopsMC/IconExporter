@@ -2,10 +2,86 @@ pluginManagement {
     repositories {
         mavenLocal()
         gradlePluginPortal()
-        maven { url = 'https://maven.neoforged.net/releases' }
+
+        exclusiveContent {
+            forRepository {
+                maven {
+                    name = 'Forge'
+                    url = uri('https://maven.minecraftforge.net/')
+                }
+            }
+            filter {
+                includeGroupByRegex("net\\.minecraftforge.*")
+            }
+        }
+        exclusiveContent {
+            forRepository {
+                maven {
+                    name = 'Parchment'
+                    url = uri('https://maven.parchmentmc.org')
+                }
+            }
+            filter {
+                includeGroupByRegex("org\\.parchmentmc.*")
+            }
+        }
+        exclusiveContent {
+            forRepository {
+                maven {
+                    name = 'Fabric'
+                    url = uri('https://maven.fabricmc.net')
+                }
+            }
+            filter {
+                includeGroup('net.fabricmc')
+                includeGroup('fabric-loom')
+            }
+        }
+        exclusiveContent {
+            forRepository {
+                maven {
+                    name = 'Neoforged'
+                    url = uri('https://maven.neoforged.net/releases')
+                }
+            }
+            filter {
+                includeGroupByRegex("net\\.neoforged.*")
+                includeGroup('codechicken')
+                includeGroup('net.covers1624')
+            }
+        }
+        exclusiveContent {
+            forRepository {
+                maven {
+                    name = 'Sponge'
+                    url = uri('https://repo.spongepowered.org/repository/maven-public/')
+                }
+            }
+            filter {
+                includeGroupByRegex("org\\.spongepowered.*")
+            }
+        }
+    }
+
+    resolutionStrategy {
+        eachPlugin {
+            if (requested.id.id == "net.minecraftforge.gradle") {
+                useModule("${requested.id}:ForgeGradle:${requested.version}")
+            }
+            if (requested.id.id == "org.spongepowered.mixin") {
+                useModule("org.spongepowered:mixingradle:${requested.version}")
+            }
+        }
     }
 }
 
 plugins {
-    id 'org.gradle.toolchains.foojay-resolver-convention' version '0.5.0'
+    id 'org.gradle.toolchains.foojay-resolver-convention' version '0.8.0'
 }
+
+// This should match the folder name of the project, or else IDEA may complain (see https://youtrack.jetbrains.com/issue/IDEA-317606)
+rootProject.name = 'IconExporter'
+include('loader-common')
+include('loader-fabric')
+include('loader-neoforge')
+include('loader-forge')

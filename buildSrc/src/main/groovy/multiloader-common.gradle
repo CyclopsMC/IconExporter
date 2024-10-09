@@ -1,0 +1,299 @@
+/* Based on https://github.com/jaredlll08/MultiLoader-Template/ */
+
+plugins {
+    id 'java-library'
+    id 'maven-publish'
+	id 'jacoco'
+    id 'com.github.kt3k.coveralls'
+    id 'com.diffplug.spotless'
+}
+
+// Determine build number
+String build_number = "DEV" // this will be referenced as simply build_number from now on.
+if (System.getenv().BUILD_NUMBER)
+    build_number = System.getenv().BUILD_NUMBER
+if (System.getenv().GITHUB_RUN_ID)
+    build_number = System.getenv().GITHUB_RUN_NUMBER
+if (System.getenv().RELEASE)
+    build_number = "RELEASE"
+logger.lifecycle "BUILDING VERSION: " + build_number
+
+// Load secrets
+def getSecrets() {
+    Properties props = new Properties()
+    if (file('../secrets.properties').exists()) {
+        props.load(new FileInputStream(file('../secrets.properties')))
+    }
+    return props
+}
+def getCurseforgeKey() {
+    if(secrets.curseforge_key) {
+        return secrets.curseforge_key
+    } else if(System.getenv().GITHUB_ACTIONS && System.getenv().CURSEFORGE_KEY_SECRET) {
+        return System.getenv().CURSEFORGE_KEY_SECRET
+    } else {
+        return "DUMMY"
+    }
+}
+def getModrinthKey() {
+    if(secrets.modrinth_key) {
+        return secrets.modrinth_key
+    } else if(System.getenv().GITHUB_ACTIONS && System.getenv().MODRINTH_KEY_SECRET) {
+        return System.getenv().MODRINTH_KEY_SECRET
+    } else {
+        return "DUMMY"
+    }
+}
+def getChangelog() {
+    if (System.getenv().RELEASE) {
+        return file("../resources/changelog/${project.minecraft_version}-${project.mod_version}.txt").getText();
+    } else {
+        return "Changes since last release: ${project.github_url}/compare/${project.minecraft_version}-${project.mod_version}...${System.getenv().GITHUB_SHA}"
+    }
+}
+ext {
+    secrets = getSecrets();
+    secrets.curseforgeKey = getCurseforgeKey();
+    secrets.modrinthKey = getModrinthKey();
+    secrets.changelog = getChangelog();
+    secrets.build_number = build_number;
+}
+
+// Include build number in version
+if (build_number.equals("RELEASE"))
+    version = "${project.mod_version}"
+else
+    version = "${project.mod_version}-${build_number}"
+
+base {
+    archivesName = "${mod_id}-${minecraft_version}-${project.name.replaceAll("loader-", "")}"
+}
+
+java {
+    toolchain.languageVersion = JavaLanguageVersion.of(java_version)
+    withSourcesJar()
+    withJavadocJar()
+}
+
+repositories {
+    mavenLocal()
+    mavenCentral()
+    // https://docs.gradle.org/current/userguide/declaring_repositories.html#declaring_content_exclusively_found_in_one_repository
+    exclusiveContent {
+        forRepository {
+            maven {
+                name = 'Sponge'
+                url = 'https://repo.spongepowered.org/repository/maven-public'
+            }
+        }
+        filter { includeGroupAndSubgroups('org.spongepowered') }
+    }
+    exclusiveContent {
+        forRepositories(
+                maven {
+                    name = 'ParchmentMC'
+                    url = 'https://maven.parchmentmc.org/'
+                },
+                maven {
+                    name = "NeoForge"
+                    url = 'https://maven.neoforged.net/releases'
+                }
+        )
+        filter { includeGroup('org.parchmentmc.data') }
+    }
+    exclusiveContent {
+        forRepository {
+            maven {
+                name = 'Mojang'
+                url = 'https://libraries.minecraft.net/'
+            }
+        }
+        filter {
+            includeGroupAndSubgroups('org.lwjgl')
+            includeGroupAndSubgroups('com.mojang')
+        }
+    }
+
+    maven {
+        name "Cyclops Repo"
+        url "https://maven.pkg.github.com/CyclopsMC/packages"
+        credentials {
+            username = project.findProperty("gpr.user") ?: System.getenv("MAVEN_USERNAME") ?: System.getenv("GITHUB_USER")
+            password = project.findProperty("gpr.key") ?: System.getenv("MAVEN_KEY") ?: System.getenv("GITHUB_TOKEN")
+        }
+    }
+}
+
+// Declare capabilities on the outgoing configurations.
+// Read more about capabilities here: https://docs.gradle.org/current/userguide/component_capabilities.html#sec:declaring-additional-capabilities-for-a-local-component
+['apiElements', 'runtimeElements', 'sourcesElements', 'javadocElements'].each { variant ->
+    configurations."$variant".outgoing {
+        capability("$group:${base.archivesName.get()}:$mod_version")
+        capability("$group:$mod_id-${minecraft_version}-${project.name}:$mod_version")
+        capability("$group:$mod_id:$mod_version")
+    }
+    publishing.publications.configureEach {
+        suppressPomMetadataWarningsFor(variant)
+    }
+}
+
+sourcesJar {
+    from(rootProject.file('LICENSE')) {
+        rename { "${it}_${mod_name}" }
+    }
+}
+
+task deobfJar(type: Jar) {
+    from(rootProject.file('LICENSE')) {
+        rename { "${it}_${mod_name}" }
+    }
+
+    duplicatesStrategy(DuplicatesStrategy.FAIL)
+    archiveClassifier.set('deobf')
+    from sourceSets.main.output
+
+    manifest {
+        attributes([
+                "FMLAT": "accesstransformer.cfg",
+                "Specification-Title": "${project.name}",
+                "Specification-Vendor": "rubensworks",
+                "Specification-Version": "${project.mod_version}",
+                "Implementation-Title": "${project.name}",
+                "Implementation-Version": "${project.mod_version}",
+                "Implementation-Vendor" :"rubensworks",
+                "Implementation-Timestamp": new Date().format("yyyy-MM-dd'T'HH:mm:ssZ")
+        ])
+    }
+}
+
+jar {
+    from(rootProject.file('LICENSE')) {
+        rename { "${it}_${mod_name}" }
+    }
+
+    manifest {
+        attributes([
+                'Specification-Title'      : mod_name,
+                'Specification-Vendor'     : mod_author,
+                'Specification-Version'    : project.jar.archiveVersion,
+                'Implementation-Title'     : project.name,
+                'Implementation-Version'   : project.jar.archiveVersion,
+                'Implementation-Vendor'    : mod_author,
+				"Implementation-Timestamp" : new Date().format("yyyy-MM-dd'T'HH:mm:ssZ"),
+                'Built-On-Minecraft'       : minecraft_version
+        ])
+    }
+}
+
+artifacts {
+    archives deobfJar
+    archives sourcesJar
+    archives javadocJar
+}
+
+// Replace properties in files
+processResources {
+    def expandProps = [
+            'mod_version'                  : mod_version,
+            'group'                        : project.group, //Else we target the task's group.
+            'minecraft_version'            : minecraft_version,
+            'fabric_version'               : fabric_version,
+            'fabric_loader_version'        : fabric_loader_version,
+            'mod_name'                     : mod_name,
+            'mod_author'                   : mod_author,
+            'mod_id'                       : mod_id,
+            'license'                      : license,
+			'issue_tracker_url'            : issue_tracker_url,
+			'display_url'                  : display_url,
+            'description'                  : project.description,
+            'neoforge_version'             : neoforge_version,
+            'neoforge_loader_version_range': neoforge_loader_version_range,
+            'neoforge_update_json_url'     : neoforge_update_json_url,
+            'forge_version'                : forge_version,
+            'forge_loader_version_range'   : forge_loader_version_range,
+            'forge_update_json_url'        : forge_update_json_url,
+            'java_version'                 : java_version,
+            'cyclopscore_version'          : cyclopscore_version,
+            'cyclopscore_version_semver'   : cyclopscore_version.replaceAll("-.*\$", "")
+    ]
+
+    filesMatching(['pack.mcmeta', 'fabric.mod.json', 'META-INF/mods.toml', 'META-INF/neoforge.mods.toml', 'mixins.*.json']) {
+        expand expandProps
+    }
+    inputs.properties(expandProps)
+}
+
+configurations {
+    deployerJars
+}
+
+publishing {
+    repositories {
+        if (project.hasProperty("filesmaven_url")) {
+            logger.info('Publishing to files server')
+            maven {
+                url project.filesmaven_url
+                credentials {
+                    username = project.filesmaven_username
+                    password = project.filesmaven_key
+                }
+            }
+        } else if (System.getenv("MAVEN_URL")) {
+            logger.info('Publishing to files server')
+            maven {
+                url System.getenv("MAVEN_URL")
+                credentials {
+                    username = System.getenv("MAVEN_USERNAME")
+                    password = System.getenv("MAVEN_KEY")
+                }
+            }
+        } else {
+            logger.error('No maven repo was set!')
+        }
+    }
+
+    publications { PublicationContainer publicationContainer ->
+        publicationContainer.register("maven", MavenPublication) { MavenPublication publication ->
+            publication.artifacts = [jar, javadocJar, deobfJar, sourcesJar]
+            publication.artifactId = project.archivesBaseName.toLowerCase() // GH can't handle uppercase...
+        }
+    }
+}
+
+spotless {
+    java {
+        target 'src/*/java/org/cyclops/**/*.java'
+
+        endWithNewline()
+        trimTrailingWhitespace()
+        removeUnusedImports()
+        indentWithSpaces()
+    }
+}
+
+tasks.register('updateGitHooks', Copy) {
+    from './scripts/pre-commit'
+    into './.git/hooks'
+}
+compileJava.dependsOn updateGitHooks
+
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = 'UTF-8' // Use the UTF-8 charset for Java compilation
+}
+
+// The following is required to fix running unit tests during build phase
+tasks.configureEach { task ->
+    if (task.name.startsWith("test")) {
+        task.enabled = true
+    }
+    if (task.name.startsWith("testJunit")) {
+        task.enabled = false
+    }
+}
+
+jacocoTestReport {
+    reports {
+        xml.required = true
+        html.required = true
+    }
+}

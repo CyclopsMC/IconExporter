@@ -12,13 +12,13 @@ import org.cyclops.iconexporter.IconExporter;
  */
 public class ClientProxy extends ClientProxyComponent {
 
-	public ClientProxy() {
-		super(new CommonProxy());
-	}
+    public ClientProxy() {
+        super(new CommonProxy());
+    }
 
-	@Override
-	public ModBase getMod() {
-		return IconExporter._instance;
-	}
+    @Override
+    public ModBase getMod() {
+        return IconExporter._instance;
+    }
 
 }

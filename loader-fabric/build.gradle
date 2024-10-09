@@ -1,0 +1,58 @@
+import net.darkhax.curseforgegradle.Constants
+import net.darkhax.curseforgegradle.TaskPublishCurseForge
+
+plugins {
+    id 'multiloader-loader-fabric'
+}
+
+repositories {
+    maven {
+        name "Forge Config API Port"
+        url "https://raw.githubusercontent.com/Fuzss/modresources/main/maven/"
+    }
+}
+
+dependencies {
+    // Add something like 'cyclopscore_version_local=0.1.0-DEV' to your secrets.properties if you want to use a custom local CyclopsCore version.
+    if (secrets.cyclopscore_version_local) {
+        implementation "org.cyclops.cyclopscore:cyclopscore-${project.minecraft_version}-fabric:${secrets.cyclopscore_version_local}:deobf"
+    } else {
+        implementation "org.cyclops.cyclopscore:cyclopscore-${project.minecraft_version}-fabric:${project.cyclopscore_version}:deobf"
+    }
+
+    modApi "fuzs.forgeconfigapiport:forgeconfigapiport-fabric:${fabric_forgeconfigapiport_version}"
+}
+
+task publishCurseForge(type: TaskPublishCurseForge) {
+    dependsOn(tasks.remapJar)
+    apiToken = secrets.curseforgeKey;
+    def mainFile = upload(project.curseforge_project_id, remapJar)
+    mainFile.releaseType = secrets.build_number.equals("RELEASE") ? Constants.RELEASE_TYPE_RELEASE : Constants.RELEASE_TYPE_BETA
+    mainFile.changelogType = "text"
+    mainFile.changelog = secrets.changelog
+    mainFile.addJavaVersion("Java ${project.java_version}")
+    mainFile.addGameVersion(project.minecraft_version)
+    mainFile.addModLoader("Fabric")
+    mainFile.addModLoader("Quilt")
+
+    mainFile.addRequirement("cyclops-core")
+    mainFile.addOptional("forge-config-api-port-fabric")
+}
+
+modrinth {
+    token = secrets.modrinthKey;
+    projectId = "${modrinth_project_id}"
+    versionNumber = project.minecraft_version + '-' + project.version
+    versionName = "${project.version} for Fabric ${project.minecraft_version}"
+    versionType = secrets.build_number.equals("RELEASE") ? "release" : "beta"
+    uploadFile = remapJar
+    gameVersions = [ project.minecraft_version ]
+    loaders = ["fabric", "quilt"]
+    changelog = provider { secrets.changelog }
+
+    dependencies {
+        required.project "Z9DM0LJ4" // Cyclops Core
+        optional.project "ohNO6lps" // forge-config-api-port-fabric
+    }
+}
+tasks.modrinth.dependsOn(tasks.remapJar)

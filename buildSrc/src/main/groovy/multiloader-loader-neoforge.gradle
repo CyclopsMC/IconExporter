@@ -1,0 +1,92 @@
+/* Based on https://github.com/jaredlll08/MultiLoader-Template/ */
+
+plugins {
+    id 'multiloader-loader'
+    id 'net.neoforged.gradle.userdev'
+}
+
+// All jar files from this folder will be added automatically as runtime mod dependencies (inspired by AE2's build.gradle)
+def extraModsDir = "extra-mods"
+
+repositories {
+    flatDir {
+        name "extra-mods"
+        dir file(extraModsDir)
+    }
+}
+
+dependencies {
+    implementation "net.neoforged:neoforge:${neoforge_version}"
+
+    testImplementation "junit:junit:4.12"
+    testImplementation "org.mockito:mockito-core:1.+"
+
+    // Locally sourced extra mods for runtime (i.e. testing)
+    for (extraModJar in fileTree(dir: extraModsDir, include: '*.jar')) {
+        def basename = extraModJar.name.substring(0, extraModJar.name.length() - ".jar".length())
+        def versionSep = basename.lastIndexOf('-')
+        assert versionSep != -1
+        def artifactId = basename.substring(0, versionSep)
+        def version = basename.substring(versionSep + 1)
+        runtimeOnly "extra-mods:$artifactId:$version"
+    }
+}
+
+sourceSets.main.resources { srcDir 'src/generated/resources' }
+
+minecraft {
+    // Automatically enable neoforge AccessTransformers if the file exists
+    def at = project(':loader-common').file('src/main/resources/META-INF/accesstransformer.cfg')
+    if (at.exists()) {
+        accessTransformers {
+            file(at.absolutePath)
+        }
+    }
+}
+
+subsystems {
+    parchment {
+        minecraftVersion = "${parchment_minecraft_version}"
+        mappingsVersion = "${parchment_version}"
+    }
+}
+
+runs {
+    configureEach {
+        systemProperty 'neoforge.logging.markers', 'REGISTRIES'
+        systemProperty 'neoforge.logging.console.level', 'debug'
+        modSource project.sourceSets.main
+    }
+
+    client {
+        systemProperty 'neoforge.enabledGameTestNamespaces', mod_id
+    }
+
+    server {
+        systemProperty 'neoforge.enabledGameTestNamespaces', mod_id
+        programArgument '--nogui'
+    }
+
+    gameTestServer {
+        systemProperty 'neoforge.enabledGameTestNamespaces', mod_id
+    }
+
+    data {
+        programArguments.addAll '--mod', mod_id, '--all', '--output', file('src/generated/resources/').getAbsolutePath(), '--existing', file('src/main/resources/').getAbsolutePath()
+    }
+}
+
+tasks.register('signJar').configure {
+    dependsOn(tasks.jar)
+
+    onlyIf {
+        System.getenv().SIGN_KEYSTORE
+    }
+
+    keyStore = System.getenv().SIGN_KEYSTORE
+    alias = System.getenv().SIGN_ALIAS
+    storePass = System.getenv().SIGN_STOREPASS
+    keyPass = System.getenv().SIGN_KEYPASS
+    input = jar.archivePath
+    output = jar.archivePath
+}

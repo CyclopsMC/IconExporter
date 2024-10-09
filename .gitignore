@@ -1,9 +1,9 @@
 # We don't want compiled stuff in here!
 /bin
 doc/info.txt
-/build
-/run
-/runs
+build
+run
+runs
 
 # Ignore project specific files
 .classpath
@@ -11,14 +11,18 @@ doc/info.txt
 .settings
 .pydevproject
 eclipse/*
-.gradle/*
+.gradle
 repo/*
 *.iml
 *.ipr
 *.iws
 out/*
 keystore.jks
+lib
 .idea
+logs
+~
+extra-mods
 
 # Ignore mac-specific file(s)
 .DS_Store

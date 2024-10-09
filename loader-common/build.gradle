@@ -1,0 +1,12 @@
+plugins {
+    id 'multiloader-loader-common'
+}
+
+dependencies {
+    // Add something like 'cyclopscore_version_local=0.1.0-DEV' to your secrets.properties if you want to use a custom local CyclopsCore version.
+    if (secrets.cyclopscore_version_local) {
+        implementation "org.cyclops.cyclopscore:cyclopscore-${project.minecraft_version}-common:${secrets.cyclopscore_version_local}:deobf"
+    } else {
+        implementation "org.cyclops.cyclopscore:cyclopscore-${project.minecraft_version}-common:${project.cyclopscore_version}:deobf"
+    }
+}

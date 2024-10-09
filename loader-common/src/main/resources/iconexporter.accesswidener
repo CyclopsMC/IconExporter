@@ -1,5 +1,5 @@
 accessWidener v1 named
 
-accessible field com/mojang/blaze3d/platform/NativeImage pixels i
+accessible field com/mojang/blaze3d/platform/NativeImage pixels J
 
-accessible method net/minecraft/util/thread/BlockableEventLoop submitAsync(Ljava/lang/Runnable;) Ljava/util/concurrent/CompletableFuture;
+accessible method net/minecraft/util/thread/BlockableEventLoop submitAsync (Ljava/lang/Runnable;)Ljava/util/concurrent/CompletableFuture;

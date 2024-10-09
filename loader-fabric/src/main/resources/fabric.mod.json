@@ -1,0 +1,33 @@
+{
+  "schemaVersion": 1,
+  "id": "${mod_id}",
+  "version": "${mod_version}",
+
+  "name": "${mod_name}",
+  "description": "${description}",
+  "authors": [
+    "${mod_author}"
+  ],
+  "contact": {
+    "homepage": "${display_url}",
+    "sources": "${issue_tracker_url}"
+  },
+
+  "license": "${license}",
+  "icon": "logo.png",
+
+  "environment": "*",
+  "entrypoints": {
+    "main": [
+      "org.cyclops.iconexporter.IconExporterFabric"
+    ]
+  },
+  "accessWidener" : "iconexporter.accesswidener",
+
+  "depends": {
+    "cyclopscore": ">=${cyclopscore_version_semver}",
+    "fabricloader": ">=${fabric_loader_version}",
+    "fabric-api": ">=${fabric_version}",
+    "java": ">=${java_version}"
+  }
+}

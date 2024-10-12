@@ -40,11 +40,6 @@ tasks.named('javadoc', Javadoc).configure {
     source(configurations.commonJava)
 }
 
-javadoc {
-    // prevent java 8's strict doclint for javadocs from failing builds
-    options.addStringOption('Xdoclint:accessibility,html,reference,syntax', '-quiet')
-}
-
 tasks.named('sourcesJar', Jar) {
     dependsOn(configurations.commonJava)
     from(configurations.commonJava)

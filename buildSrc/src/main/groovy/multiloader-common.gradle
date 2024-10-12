@@ -297,3 +297,8 @@ jacocoTestReport {
         html.required = true
     }
 }
+
+javadoc {
+    // prevent java 8's strict doclint for javadocs from failing builds
+    options.addStringOption('Xdoclint:accessibility,html,reference,syntax', '-quiet')
+}

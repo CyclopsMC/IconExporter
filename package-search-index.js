@@ -1,1 +1,1 @@
-packageSearchIndex = [{"l":"All Packages","u":"allpackages-index.html"},{"l":"org.cyclops.iconexporter"},{"l":"org.cyclops.iconexporter.client.gui"},{"l":"org.cyclops.iconexporter.command"},{"l":"org.cyclops.iconexporter.proxy"}];updateSearchResults();
+packageSearchIndex = [{"l":"All Packages","u":"allpackages-index.html"},{"l":"org.cyclops.iconexporter"},{"l":"org.cyclops.iconexporter.client.gui"},{"l":"org.cyclops.iconexporter.command"},{"l":"org.cyclops.iconexporter.helpers"},{"l":"org.cyclops.iconexporter.proxy"}];updateSearchResults();

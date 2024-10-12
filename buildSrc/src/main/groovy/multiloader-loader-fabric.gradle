@@ -38,7 +38,18 @@ loom {
             ideConfigGenerated(true)
             runDir('runs/server')
         }
+        gameTest {
+            server()
+            setConfigName('Loader-fabric: GameTestServer')
+            ideConfigGenerated(true)
+            runDir('runs/gametest')
+            vmArg "-Dfabric-api.gametest"
+        }
     }
+}
+
+task runGameTestServer {
+    dependsOn tasks.runGameTest
 }
 
 publishing {
@@ -49,3 +60,4 @@ publishing {
         }
     }
 }
+

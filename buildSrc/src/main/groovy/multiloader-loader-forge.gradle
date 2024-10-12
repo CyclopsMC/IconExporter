@@ -52,6 +52,7 @@ minecraft {
 
     runs {
         client {
+            property 'forge.enabledGameTestNamespaces', "cyclopscore,${mod_id}"
             workingDirectory file('runs/client')
             ideaModule "${rootProject.name}.${project.name}.main"
             taskName 'Client'
@@ -63,11 +64,25 @@ minecraft {
         }
 
         server {
+            property 'forge.enabledGameTestNamespaces', "cyclopscore,${mod_id}"
+            args '--nogui'
             workingDirectory file('runs/server')
             ideaModule "${rootProject.name}.${project.name}.main"
             taskName 'Server'
             mods {
                 modServerRun {
+                    source sourceSets.main
+                }
+            }
+        }
+
+        gameTestServer {
+            property 'forge.enabledGameTestNamespaces', "cyclopscore,${mod_id}"
+            workingDirectory file('runs/gametest')
+            ideaModule "${rootProject.name}.${project.name}.main"
+            taskName 'runGameTestServer'
+            mods {
+                modDataRun {
                     source sourceSets.main
                 }
             }
@@ -108,3 +123,4 @@ sourceSets.forEach {
     it.output.resourcesDir = dir
     it.java.destinationDirectory = dir
 }
+

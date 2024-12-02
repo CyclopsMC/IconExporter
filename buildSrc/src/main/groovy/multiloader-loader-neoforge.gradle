@@ -76,17 +76,30 @@ runs {
     }
 }
 
-tasks.register('signJar').configure {
-    dependsOn(tasks.jar)
+// Disabled because signed jars are not being checked anyways
+//tasks.register('signJar').configure {
+//    dependsOn(tasks.jar)
+//
+//    onlyIf {
+//        System.getenv().SIGN_KEYSTORE
+//    }
+//
+//    keyStore = System.getenv().SIGN_KEYSTORE
+//    alias = System.getenv().SIGN_ALIAS
+//    storePass = System.getenv().SIGN_STOREPASS
+//    keyPass = System.getenv().SIGN_KEYPASS
+//    input = jar.archivePath
+//    output = jar.archivePath
+//}
 
-    onlyIf {
-        System.getenv().SIGN_KEYSTORE
+// Measure coverage for game tests
+tasks.whenTaskAdded { task ->
+    if (task.name.equals('runGameTestServer')) {
+        jacocoTestReport.dependsOn test, task
+        jacoco.applyTo(task)
     }
-
-    keyStore = System.getenv().SIGN_KEYSTORE
-    alias = System.getenv().SIGN_ALIAS
-    storePass = System.getenv().SIGN_STOREPASS
-    keyPass = System.getenv().SIGN_KEYPASS
-    input = jar.archivePath
-    output = jar.archivePath
+}
+jacocoTestReport {
+    // Include unit and game test coverage
+    executionData fileTree(project.buildDir).include("jacoco/*.exec")
 }

@@ -4,7 +4,6 @@ plugins {
     id 'java-library'
     id 'maven-publish'
 	id 'jacoco'
-    id 'com.github.kt3k.coveralls'
     id 'com.diffplug.spotless'
 }
 
@@ -291,6 +290,11 @@ tasks.configureEach { task ->
     }
 }
 
+javadoc {
+    // prevent java 8's strict doclint for javadocs from failing builds
+    options.addStringOption('Xdoclint:accessibility,html,reference,syntax', '-quiet')
+}
+
 jacocoTestReport {
     reports {
         xml.required = true
@@ -298,7 +302,6 @@ jacocoTestReport {
     }
 }
 
-javadoc {
-    // prevent java 8's strict doclint for javadocs from failing builds
-    options.addStringOption('Xdoclint:accessibility,html,reference,syntax', '-quiet')
+jacoco {
+    toolVersion = "0.8.12"
 }

@@ -52,6 +52,16 @@ task runGameTestServer {
     dependsOn tasks.runGameTest
 }
 
+// Measure coverage for game tests
+jacoco {
+    applyTo runGameTest
+}
+jacocoTestReport {
+    dependsOn test, runGameTest
+    // Include unit and game test coverage
+    executionData fileTree(project.buildDir).include("jacoco/*.exec")
+}
+
 publishing {
     publications { PublicationContainer publicationContainer ->
         publicationContainer.getByName("maven") { MavenPublication publication ->

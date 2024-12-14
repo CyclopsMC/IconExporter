@@ -1,1 +1,8 @@
-{}
+{
+  "_comment": "Genel",
+  "gui.itemexporter.name": "Simge Dışa Aktarıcı",
+  "gui.itemexporter.finished": "Dışa aktarım tamamlandı",
+  "gui.itemexporter.error": "Dışa aktarırken hata oluştu",
+  "gui.itemexporter.status": "Oluşturma %s / %s",
+  "gui.itemexporter.metadata_export.success": "Metadata dosyası şuraya aktarıldı %s"
+}

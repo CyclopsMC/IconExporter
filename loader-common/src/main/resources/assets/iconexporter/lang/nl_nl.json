@@ -1,1 +1,8 @@
-{}
+{
+  "_comment": "Algemeen",
+  "gui.itemexporter.name": "Pictogrammen exporteren",
+  "gui.itemexporter.finished": "Exporteren voltooid",
+  "gui.itemexporter.error": "Fout tijdens het exporteren",
+  "gui.itemexporter.status": "Verwerken %s / %s",
+  "gui.itemexporter.metadata_export.success": "Metadatabestand geëxporteerd naar %s"
+}

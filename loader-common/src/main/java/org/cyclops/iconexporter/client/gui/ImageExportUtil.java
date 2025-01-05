@@ -69,13 +69,13 @@ public class ImageExportUtil {
         alpha %= 0xff;
         for (int cx = 0; cx < image.getWidth(); cx++) {
             for (int cy = 0; cy < image.getHeight(); cy++) {
-                int color = image.getPixelRGBA(cx, cy);
+                int color = image.getPixel(cx, cy);
 
                 if (color == backgroundColor) {
                     color = 0;
                     int mc = (alpha << 24) | 0x00ffffff;
                     int newcolor = color & mc;
-                    image.setPixelRGBA(cx, cy, newcolor);
+                    image.setPixel(cx, cy, newcolor);
                 }
             }
         }

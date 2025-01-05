@@ -73,6 +73,7 @@ java {
     withSourcesJar()
     withJavadocJar()
 }
+compileJava.options.compilerArgs << "-Xmaxerrs" << "9999"
 
 repositories {
     mavenLocal()

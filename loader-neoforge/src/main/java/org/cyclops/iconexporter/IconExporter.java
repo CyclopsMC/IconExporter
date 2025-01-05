@@ -7,8 +7,8 @@ import net.minecraft.commands.Commands;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.common.Mod;
 import org.apache.logging.log4j.Level;
-import org.cyclops.cyclopscore.config.ConfigHandler;
-import org.cyclops.cyclopscore.init.ModBaseVersionable;
+import org.cyclops.cyclopscore.config.ConfigHandlerCommon;
+import org.cyclops.cyclopscore.init.ModBaseNeoForge;
 import org.cyclops.cyclopscore.proxy.IClientProxy;
 import org.cyclops.cyclopscore.proxy.ICommonProxy;
 import org.cyclops.iconexporter.command.CommandExport;
@@ -23,7 +23,7 @@ import org.cyclops.iconexporter.proxy.CommonProxy;
  *
  */
 @Mod(Reference.MOD_ID)
-public class IconExporter extends ModBaseVersionable<IconExporter> {
+public class IconExporter extends ModBaseNeoForge<IconExporter> {
 
     /**
      * The unique instance of this mod.
@@ -63,7 +63,7 @@ public class IconExporter extends ModBaseVersionable<IconExporter> {
     }
 
     @Override
-    protected void onConfigsRegister(ConfigHandler configHandler) {
+    protected void onConfigsRegister(ConfigHandlerCommon configHandler) {
         super.onConfigsRegister(configHandler);
 
         configHandler.addConfigurable(new GeneralConfig<>(this));

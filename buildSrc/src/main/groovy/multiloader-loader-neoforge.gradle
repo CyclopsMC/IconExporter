@@ -64,15 +64,15 @@ runs {
 
     server {
         systemProperty 'neoforge.enabledGameTestNamespaces', "cyclopscore,${mod_id}"
-        programArgument '--nogui'
+        argument '--nogui'
     }
 
     gameTestServer {
         systemProperty 'neoforge.enabledGameTestNamespaces', "cyclopscore,${mod_id}"
     }
 
-    data {
-        programArguments.addAll '--mod', mod_id, '--all', '--output', file('src/generated/resources/').getAbsolutePath(), '--existing', file('src/main/resources/').getAbsolutePath()
+     clientData {
+        arguments.addAll '--mod', mod_id, '--all', '--output', file('src/generated/resources/').getAbsolutePath(), '--existing', file('src/main/resources/').getAbsolutePath()
     }
 }
 

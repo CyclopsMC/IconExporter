@@ -36,8 +36,6 @@ public class ScreenIconExporter extends Screen {
 
     // (a << 24) | (r << 16) | (g << 8) | b
     private static final int BACKGROUND_COLOR = IModHelpers.get().getBaseHelpers().RGBAToInt(254, 255, 255, 255); // -65537
-    // (a << 24) | (b << 16) | (g << 8) | r
-    private static final int BACKGROUND_COLOR_SHIFTED = (255 << 24) | (255 << 16) | (255 << 8) | 254; // For some reason, MC shifts around colors internally... (R seems to be moved from the 16th bit to the 0th bit)
 
     private final HolderLookup.Provider lookupProvider;
     private final int scaleImage;
@@ -62,20 +60,20 @@ public class ScreenIconExporter extends Screen {
 
         if (exportTasks.isEmpty()) {
             Minecraft.getInstance().setScreen(null);
-            Minecraft.getInstance().player.sendSystemMessage(Component.translatable("gui.itemexporter.finished"));
+            Minecraft.getInstance().player.displayClientMessage(Component.translatable("gui.itemexporter.finished"), false);
         } else {
             IExportTask task = exportTasks.poll();
             try {
                 task.run(guiGraphics);
             } catch (IOException e) {
-                Minecraft.getInstance().player.sendSystemMessage(Component.translatable("gui.itemexporter.error"));
+                Minecraft.getInstance().player.displayClientMessage(Component.translatable("gui.itemexporter.error"), false);
                 e.printStackTrace();
             }
         }
     }
 
     @Override
-    protected void renderBlurredBackground(float p_330683_) {
+    protected void renderBlurredBackground() {
         // Do nothing
     }
 
@@ -109,7 +107,7 @@ public class ScreenIconExporter extends Screen {
                 signalStatus(tasks, taskProcessed);
                 guiGraphics.fill(0, 0, scaleModifiedRounded, scaleModifiedRounded, BACKGROUND_COLOR);
                 ItemRenderUtil.renderFluid(guiGraphics, fluidEntry.getValue(), scaleModified, this.helpers);
-                ImageExportUtil.exportImageFromScreenshot(baseDir, baseFilename, this.scaleImage, BACKGROUND_COLOR_SHIFTED, this.mod);
+                ImageExportUtil.exportImageFromScreenshot(baseDir, baseFilename, this.scaleImage, BACKGROUND_COLOR, this.mod);
             });
         }
 
@@ -128,7 +126,7 @@ public class ScreenIconExporter extends Screen {
                     signalStatus(tasks, taskProcessed);
                     guiGraphics.fill(0, 0, scaleModifiedRounded, scaleModifiedRounded, BACKGROUND_COLOR);
                     ItemRenderUtil.renderItem(guiGraphics, itemStack, scaleModified);
-                    ImageExportUtil.exportImageFromScreenshot(baseDir, baseFilename, this.scaleImage, BACKGROUND_COLOR_SHIFTED, this.mod);
+                    ImageExportUtil.exportImageFromScreenshot(baseDir, baseFilename, this.scaleImage, BACKGROUND_COLOR, this.mod);
                     if (!itemStack.getComponents().isEmpty() && GeneralConfig.fileNameHashComponents) {
                         ImageExportUtil.exportNbtFile(lookupProvider, baseDir, baseFilename, itemStack.getComponentsPatch(), this.mod, this.helpers);
                     }

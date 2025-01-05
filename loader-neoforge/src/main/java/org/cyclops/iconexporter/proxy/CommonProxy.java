@@ -1,6 +1,6 @@
 package org.cyclops.iconexporter.proxy;
 
-import org.cyclops.cyclopscore.init.ModBase;
+import org.cyclops.cyclopscore.init.ModBaseNeoForge;
 import org.cyclops.cyclopscore.proxy.CommonProxyComponent;
 import org.cyclops.iconexporter.IconExporter;
 
@@ -12,7 +12,7 @@ import org.cyclops.iconexporter.IconExporter;
 public class CommonProxy extends CommonProxyComponent {
 
     @Override
-    public ModBase getMod() {
+    public ModBaseNeoForge<IconExporter> getMod() {
         return IconExporter._instance;
     }
 

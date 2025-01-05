@@ -5,6 +5,7 @@ import net.minecraft.commands.CommandBuildContext;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import org.cyclops.cyclopscore.config.ConfigHandlerCommon;
 import org.cyclops.cyclopscore.init.ModBaseForge;
 import org.cyclops.cyclopscore.proxy.IClientProxyCommon;
@@ -28,8 +29,8 @@ public class IconExporterForge extends ModBaseForge<IconExporterForge> {
      */
     public static IconExporterForge _instance;
 
-    public IconExporterForge() {
-        super(Reference.MOD_ID, (instance) -> _instance = instance);
+    public IconExporterForge(FMLJavaModLoadingContext context) {
+        super(Reference.MOD_ID, (instance) -> _instance = instance, context);
     }
 
     @Override

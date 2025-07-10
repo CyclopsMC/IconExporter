@@ -4,6 +4,7 @@ import com.google.common.collect.Queues;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.renderer.fog.FogRenderer;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.Tag;
@@ -73,7 +74,7 @@ public class ScreenIconExporter extends Screen {
     }
 
     @Override
-    protected void renderBlurredBackground() {
+    protected void renderBlurredBackground(GuiGraphics guiGraphics) {
         // Do nothing
     }
 
@@ -107,6 +108,7 @@ public class ScreenIconExporter extends Screen {
                 signalStatus(tasks, taskProcessed);
                 guiGraphics.fill(0, 0, scaleModifiedRounded, scaleModifiedRounded, BACKGROUND_COLOR);
                 ItemRenderUtil.renderFluid(guiGraphics, fluidEntry.getValue(), scaleModified, this.helpers);
+                flushRenderBuffer();
                 ImageExportUtil.exportImageFromScreenshot(baseDir, baseFilename, this.scaleImage, BACKGROUND_COLOR, this.mod);
             });
         }
@@ -126,6 +128,7 @@ public class ScreenIconExporter extends Screen {
                     signalStatus(tasks, taskProcessed);
                     guiGraphics.fill(0, 0, scaleModifiedRounded, scaleModifiedRounded, BACKGROUND_COLOR);
                     ItemRenderUtil.renderItem(guiGraphics, itemStack, scaleModified);
+                    flushRenderBuffer();
                     ImageExportUtil.exportImageFromScreenshot(baseDir, baseFilename, this.scaleImage, BACKGROUND_COLOR, this.mod);
                     if (!itemStack.getComponents().isEmpty() && GeneralConfig.fileNameHashComponents) {
                         ImageExportUtil.exportNbtFile(lookupProvider, baseDir, baseFilename, itemStack.getComponentsPatch(), this.mod, this.helpers);
@@ -135,6 +138,10 @@ public class ScreenIconExporter extends Screen {
         }
 
         return exportTasks;
+    }
+
+    private void flushRenderBuffer() {
+        Minecraft.getInstance().gameRenderer.guiRenderer.render(Minecraft.getInstance().gameRenderer.fogRenderer.getBuffer(FogRenderer.FogMode.NONE));
     }
 
     protected void signalStatus(Wrapper<Integer> tasks, Wrapper<Integer> taskProcessed) {

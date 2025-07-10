@@ -5,6 +5,7 @@ plugins {
     id 'maven-publish'
 	id 'jacoco'
     id 'com.diffplug.spotless'
+    id 'idea'
 }
 
 // Determine build number
@@ -76,6 +77,10 @@ java {
 compileJava.options.compilerArgs << "-Xmaxerrs" << "9999"
 
 repositories {
+    maven {
+        name = 'Mojang'
+        url = 'https://libraries.minecraft.net/'
+    }
     mavenLocal()
     mavenCentral()
     // https://docs.gradle.org/current/userguide/declaring_repositories.html#declaring_content_exclusively_found_in_one_repository
@@ -100,18 +105,6 @@ repositories {
                 }
         )
         filter { includeGroup('org.parchmentmc.data') }
-    }
-    exclusiveContent {
-        forRepository {
-            maven {
-                name = 'Mojang'
-                url = 'https://libraries.minecraft.net/'
-            }
-        }
-        filter {
-            includeGroupAndSubgroups('org.lwjgl')
-            includeGroupAndSubgroups('com.mojang')
-        }
     }
 
     maven {
@@ -294,6 +287,13 @@ tasks.configureEach { task ->
 javadoc {
     // prevent java 8's strict doclint for javadocs from failing builds
     options.addStringOption('Xdoclint:accessibility,html,reference,syntax', '-quiet')
+}
+
+idea {
+    module {
+        downloadSources = true
+        downloadJavadoc = true
+    }
 }
 
 jacocoTestReport {

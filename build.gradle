@@ -1,11 +1,11 @@
 plugins {
-    id 'net.darkhax.curseforgegradle' version '1.0.8' apply false
+    id 'net.darkhax.curseforgegradle' version '1.1.26' apply false
     id 'com.diffplug.spotless' version '6.25.0' apply false
 	id 'com.modrinth.minotaur' version '2.+' apply false
 
-	id 'fabric-loom' version '1.9-SNAPSHOT' apply false
-	id 'net.neoforged.moddev' version '2.0.61-beta' apply false
-	id 'net.neoforged.gradle.userdev' version '7.0.171' apply false
-//	id 'net.minecraftforge.gradle' version '[6.0.24,6.2)' apply false // Don't load yet to fix DiffPatch conflict issue between FG and NG
+	id 'fabric-loom' version '1.10-SNAPSHOT' apply false
+	id 'net.neoforged.moddev' version '2.0.95' apply false
+	id 'net.neoforged.gradle.userdev' version '7.0.185' apply false
+	id 'net.minecraftforge.gradle' version '[6.0.36,6.2)' apply false
 }
 

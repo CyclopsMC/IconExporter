@@ -12,14 +12,14 @@ import org.cyclops.iconexporter.helpers.IIconExporterHelpers;
 public class ItemRenderUtil {
 
     public static void renderItem(GuiGraphics gui, ItemStack itemStack, float scale) {
-        gui.pose().pushPose();
-        gui.pose().scale(scale / 16, scale / 16, 1);
+        gui.pose().pushMatrix();
+        gui.pose().scale(scale / 16, scale / 16);
         gui.renderItem(itemStack, 0, 0);
-        gui.pose().popPose();
+        gui.pose().popMatrix();
     }
 
     public static void renderFluid(GuiGraphics gui, Fluid fluid, float scale, IIconExporterHelpers helpers) {
-        gui.pose().scale(scale / 16, scale / 16, scale / 16);
+        gui.pose().scale(scale / 16, scale / 16);
         helpers.renderFluidSlot(gui, fluid);
     }
 

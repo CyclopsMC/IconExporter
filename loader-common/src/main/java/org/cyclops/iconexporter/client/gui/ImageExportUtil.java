@@ -58,42 +58,42 @@ public class ImageExportUtil {
         return escapeKey(sb.toString());
     }
 
-    public static void exportImageFromScreenshot(File dir, String baseFilename, int scaleImage, int backgroundColor, IModBase mod) throws IOException {
+    public static void exportImageFromScreenshot(File dir, String baseFilename, int scaleImage, int backgroundColor, IModBase mod) {
         // Take a screenshot
-        NativeImage imageFull = Screenshot.takeScreenshot(Minecraft.getInstance().getMainRenderTarget());
-        NativeImage image = getSubImage(imageFull, scaleImage, scaleImage);
-        imageFull.close();
+        Screenshot.takeScreenshot(Minecraft.getInstance().getMainRenderTarget(), (imageFull) -> {
+            NativeImage image = getSubImage(imageFull, scaleImage, scaleImage);
+            imageFull.close();
 
-        // Convert our background color to a fully transparent pixel
-        byte alpha = (byte) 256;
-        alpha %= 0xff;
-        for (int cx = 0; cx < image.getWidth(); cx++) {
-            for (int cy = 0; cy < image.getHeight(); cy++) {
-                int color = image.getPixel(cx, cy);
+            // Convert our background color to a fully transparent pixel
+            byte alpha = (byte) 256;
+            alpha %= 0xff;
+            for (int cx = 0; cx < image.getWidth(); cx++) {
+                for (int cy = 0; cy < image.getHeight(); cy++) {
+                    int color = image.getPixel(cx, cy);
 
-                if (color == backgroundColor) {
-                    color = 0;
-                    int mc = (alpha << 24) | 0x00ffffff;
-                    int newcolor = color & mc;
-                    image.setPixel(cx, cy, newcolor);
+                    if (color == backgroundColor) {
+                        color = 0;
+                        int mc = (alpha << 24) | 0x00ffffff;
+                        int newcolor = color & mc;
+                        image.setPixel(cx, cy, newcolor);
+                    }
                 }
             }
-        }
 
-        try {
-            File file = new File(dir, baseFilename + ".png").getCanonicalFile();
             try {
-                image.writeToFile(file);
-            } catch (NullPointerException e) {
-                e.printStackTrace();
-                throw new IOException("Error while writing the PNG image " + file);
+                File file = new File(dir, baseFilename + ".png").getCanonicalFile();
+                try {
+                    image.writeToFile(file);
+                } catch (NullPointerException e) {
+                    e.printStackTrace();
+                    throw new IOException("Error while writing the PNG image " + file);
+                }
+            } catch (IOException e) {
+                mod.log(Level.ERROR, "Error while writing the PNG image for name " + baseFilename);
+            } finally {
+                image.close();
             }
-        } catch (IOException e) {
-            mod.log(Level.ERROR, "Error while writing the PNG image for name " + baseFilename);
-            throw e;
-        } finally {
-            image.close();
-        }
+        });
     }
 
     public static void exportNbtFile(HolderLookup.Provider lookupProvider, File dir, String baseFilename, DataComponentPatch components, IModBase mod, IIconExporterHelpers helpers) throws IOException {

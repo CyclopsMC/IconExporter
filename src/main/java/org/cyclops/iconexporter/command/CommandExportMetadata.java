@@ -13,11 +13,14 @@ import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraftforge.common.CreativeModeTabRegistry;
+import net.minecraftforge.fml.ModContainer;
+import net.minecraftforge.fml.ModList;
 import net.minecraftforge.registries.ForgeRegistries;
 import org.cyclops.iconexporter.client.gui.ImageExportUtil;
 
@@ -25,6 +28,7 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Map;
+import java.util.Optional;
 
 /**
  * A command to initiate the exporting process.
@@ -35,11 +39,20 @@ public class CommandExportMetadata implements Command<CommandSourceStack> {
 
     public CommandExportMetadata() {}
 
+    public static String getModName(String modId) {
+        Optional<? extends ModContainer> mod = ModList.get().getModContainerById(modId);
+        return mod
+                .map(modContainer -> modContainer.getModInfo().getDisplayName())
+                .orElse("Minecraft");
+    }
+
     private static JsonObject itemToJson(ItemStack itemStack) {
         JsonObject obj = new JsonObject();
         obj.addProperty("image_file", ImageExportUtil.genBaseFilenameFromItem(itemStack)+".png");
         obj.addProperty("local_name", itemStack.getHoverName().getString());
-        obj.addProperty("id", ForgeRegistries.ITEMS.getKey(itemStack.getItem()).toString());
+        ResourceLocation id = ForgeRegistries.ITEMS.getKey(itemStack.getItem());
+        obj.addProperty("mod_name", getModName(id.getNamespace()));
+        obj.addProperty("id", id.toString());
         if (itemStack.hasTag()) {
             obj.add("nbt", JsonParser.parseString(itemStack.getTag().toString()));
         }
@@ -51,6 +64,7 @@ public class CommandExportMetadata implements Command<CommandSourceStack> {
         JsonObject obj = new JsonObject();
         obj.addProperty("image_file", ImageExportUtil.genBaseFilenameFromFluid(fluidEntry.getKey())+".png");
         obj.addProperty("local_name", fluidEntry.getValue().getFluidType().getDescription().getString());
+        obj.addProperty("mod_name", getModName(fluidEntry.getKey().location().getNamespace()));
         obj.addProperty("id", fluidEntry.getKey().location().toString());
         obj.addProperty("type", "fluid");
         return obj;

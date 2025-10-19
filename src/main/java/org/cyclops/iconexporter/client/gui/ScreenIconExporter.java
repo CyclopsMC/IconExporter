@@ -19,6 +19,7 @@ import org.cyclops.cyclopscore.datastructure.Wrapper;
 import org.cyclops.cyclopscore.helper.Helpers;
 import org.cyclops.iconexporter.GeneralConfig;
 
+import javax.annotation.Nullable;
 import java.io.File;
 import java.io.IOException;
 import java.util.Map;
@@ -40,12 +41,17 @@ public class ScreenIconExporter extends Screen {
 
     private final int scaleImage;
     private final double scaleGui;
+    @Nullable
+    private final String modId;
+    private final boolean modIdRegex;
     private final Queue<IExportTask> exportTasks;
 
-    public ScreenIconExporter(int scaleImage, double scaleGui) {
+    public ScreenIconExporter(int scaleImage, double scaleGui, @Nullable String modId, boolean modIdRegex) {
         super(Component.translatable("gui.itemexporter.name"));
         this.scaleImage = scaleImage;
         this.scaleGui = scaleGui;
+        this.modId = modId;
+        this.modIdRegex = modIdRegex;
         this.exportTasks = this.createExportTasks();
     }
 
@@ -75,6 +81,10 @@ public class ScreenIconExporter extends Screen {
         }
     }
 
+    protected boolean shouldExport(ResourceLocation resourceLocation) {
+        return this.modId == null || (modIdRegex ? resourceLocation.getNamespace().matches(this.modId) : resourceLocation.getNamespace().equals(this.modId));
+    }
+
     public Queue<IExportTask> createExportTasks() {
         float scaleModified = (float) (this.scaleImage / this.scaleGui);
         int scaleModifiedRounded = (int) Math.ceil(scaleModified);
@@ -90,35 +100,39 @@ public class ScreenIconExporter extends Screen {
 
         // Add fluids
         for (Map.Entry<ResourceKey<Fluid>, Fluid> fluidEntry : ForgeRegistries.FLUIDS.getEntries()) {
-            tasks.set(tasks.get() + 1);
-            String subKey = "fluid:" + fluidEntry.getKey().location();
-            exportTasks.add((matrixStack) -> {
-                taskProcessed.set(taskProcessed.get() + 1);
-                signalStatus(tasks, taskProcessed);
-                fill(matrixStack, 0, 0, scaleModifiedRounded, scaleModifiedRounded, BACKGROUND_COLOR);
-                ItemRenderUtil.renderFluid(this, matrixStack, fluidEntry.getValue(), scaleModified);
-                ImageExportUtil.exportImageFromScreenshot(baseDir, subKey, this.scaleImage, BACKGROUND_COLOR_SHIFTED);
-            });
-        }
-
-        // Add items
-        for (ResourceLocation key : ForgeRegistries.ITEMS.getKeys()) {
-            Item value = ForgeRegistries.ITEMS.getValue(key);
-            NonNullList<ItemStack> subItems = NonNullList.create();
-            value.fillItemCategory(CreativeModeTab.TAB_SEARCH, subItems);
-            for (ItemStack subItem : subItems) {
+            if (shouldExport(fluidEntry.getKey().location())) {
                 tasks.set(tasks.get() + 1);
-                String subKey = key + (subItem.hasTag() ? "__" + serializeNbtTag(subItem.getTag()) : "");
+                String subKey = "fluid:" + fluidEntry.getKey().location();
                 exportTasks.add((matrixStack) -> {
                     taskProcessed.set(taskProcessed.get() + 1);
                     signalStatus(tasks, taskProcessed);
                     fill(matrixStack, 0, 0, scaleModifiedRounded, scaleModifiedRounded, BACKGROUND_COLOR);
-                    ItemRenderUtil.renderItem(matrixStack, subItem, scaleModified);
+                    ItemRenderUtil.renderFluid(this, matrixStack, fluidEntry.getValue(), scaleModified);
                     ImageExportUtil.exportImageFromScreenshot(baseDir, subKey, this.scaleImage, BACKGROUND_COLOR_SHIFTED);
-                    if (subItem.hasTag() && GeneralConfig.fileNameHashTag) {
-                        ImageExportUtil.exportNbtFile(baseDir, subKey, subItem.getTag());
-                    }
                 });
+            }
+        }
+
+        // Add items
+        for (ResourceLocation key : ForgeRegistries.ITEMS.getKeys()) {
+            if (shouldExport(key)) {
+                Item value = ForgeRegistries.ITEMS.getValue(key);
+                NonNullList<ItemStack> subItems = NonNullList.create();
+                value.fillItemCategory(CreativeModeTab.TAB_SEARCH, subItems);
+                for (ItemStack subItem : subItems) {
+                    tasks.set(tasks.get() + 1);
+                    String subKey = key + (subItem.hasTag() ? "__" + serializeNbtTag(subItem.getTag()) : "");
+                    exportTasks.add((matrixStack) -> {
+                        taskProcessed.set(taskProcessed.get() + 1);
+                        signalStatus(tasks, taskProcessed);
+                        fill(matrixStack, 0, 0, scaleModifiedRounded, scaleModifiedRounded, BACKGROUND_COLOR);
+                        ItemRenderUtil.renderItem(matrixStack, subItem, scaleModified);
+                        ImageExportUtil.exportImageFromScreenshot(baseDir, subKey, this.scaleImage, BACKGROUND_COLOR_SHIFTED);
+                        if (subItem.hasTag() && GeneralConfig.fileNameHashTag) {
+                            ImageExportUtil.exportNbtFile(baseDir, subKey, subItem.getTag());
+                        }
+                    });
+                }
             }
         }
 

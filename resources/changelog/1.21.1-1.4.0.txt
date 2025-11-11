@@ -1,0 +1,8 @@
+As always, don't forget to backup your world before updating!
+Requires CyclopsCore version 1.25.1 or higher.
+
+Additions:
+* Include mod_name in metadata output, Closes #28
+* Allow filtering by mod when exporting, Closes #9
+* Add nl_nl translations
+* Add tr_tr translation

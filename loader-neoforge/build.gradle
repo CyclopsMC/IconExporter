@@ -19,7 +19,7 @@ task publishCurseForge(type: TaskPublishCurseForge) {
     apiToken = secrets.curseforgeKey;
     def mainFile = upload(project.curseforge_project_id, jar)
     mainFile.releaseType = secrets.build_number.equals("RELEASE") ? Constants.RELEASE_TYPE_RELEASE : Constants.RELEASE_TYPE_BETA
-    mainFile.changelogType = "text"
+    mainFile.changelogType = "markdown"
     mainFile.changelog = secrets.changelog
     mainFile.addJavaVersion("Java ${project.java_version}")
     mainFile.addGameVersion(project.minecraft_version)

@@ -16,6 +16,7 @@ import net.minecraft.core.HolderLookup;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraft.world.item.ItemStack;
@@ -50,6 +51,8 @@ public class CommandExportMetadata implements Command<CommandSourceStack> {
         JsonObject obj = new JsonObject();
         obj.addProperty("image_file", ImageExportUtil.genBaseFilenameFromItem(lookupProvider, itemStack, this.mod, this.helpers)+".png");
         obj.addProperty("local_name", itemStack.getHoverName().getString());
+        ResourceLocation id = BuiltInRegistries.ITEM.getKey(itemStack.getItem());
+        obj.addProperty("mod_name", helpers.getModName(id.getNamespace()));
         obj.addProperty("id", BuiltInRegistries.ITEM.getKey(itemStack.getItem()).toString());
         String componentsString = "{}";
         try {
@@ -68,6 +71,7 @@ public class CommandExportMetadata implements Command<CommandSourceStack> {
         JsonObject obj = new JsonObject();
         obj.addProperty("image_file", ImageExportUtil.genBaseFilenameFromFluid(fluidEntry.getKey())+".png");
         obj.addProperty("local_name", this.helpers.getFluidLocalName(fluidEntry.getValue()));
+        obj.addProperty("mod_name", helpers.getModName(fluidEntry.getKey().location().getNamespace()));
         obj.addProperty("id", fluidEntry.getKey().location().toString());
         obj.addProperty("type", "fluid");
         return obj;

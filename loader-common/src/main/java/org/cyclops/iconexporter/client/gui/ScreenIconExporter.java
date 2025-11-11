@@ -9,6 +9,7 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraft.world.item.ItemStack;
@@ -20,6 +21,7 @@ import org.cyclops.cyclopscore.init.IModBase;
 import org.cyclops.iconexporter.GeneralConfig;
 import org.cyclops.iconexporter.helpers.IIconExporterHelpers;
 
+import javax.annotation.Nullable;
 import java.io.File;
 import java.io.IOException;
 import java.util.Map;
@@ -42,15 +44,20 @@ public class ScreenIconExporter extends Screen {
     private final HolderLookup.Provider lookupProvider;
     private final int scaleImage;
     private final double scaleGui;
+    @Nullable
+    private final String modId;
+    private final boolean modIdRegex;
     private final IModBase mod;
     private final IIconExporterHelpers helpers;
     private final Queue<IExportTask> exportTasks;
 
-    public ScreenIconExporter(HolderLookup.Provider lookupProvider, int scaleImage, double scaleGui, IModBase mod, IIconExporterHelpers helpers) {
+    public ScreenIconExporter(HolderLookup.Provider lookupProvider, int scaleImage, double scaleGui, @Nullable String modId, boolean modIdRegex, IModBase mod, IIconExporterHelpers helpers) {
         super(Component.translatable("gui.itemexporter.name"));
         this.lookupProvider = lookupProvider;
         this.scaleImage = scaleImage;
         this.scaleGui = scaleGui;
+        this.modId = modId;
+        this.modIdRegex = modIdRegex;
         this.mod = mod;
         this.helpers = helpers;
         this.exportTasks = this.createExportTasks();
@@ -87,6 +94,10 @@ public class ScreenIconExporter extends Screen {
         }
     }
 
+    protected boolean shouldExport(ResourceLocation resourceLocation) {
+        return this.modId == null || (modIdRegex ? resourceLocation.getNamespace().matches(this.modId) : resourceLocation.getNamespace().equals(this.modId));
+    }
+
     public Queue<IExportTask> createExportTasks() {
         float scaleModified = (float) (this.scaleImage / this.scaleGui);
         int scaleModifiedRounded = (int) Math.ceil(scaleModified);
@@ -102,15 +113,17 @@ public class ScreenIconExporter extends Screen {
 
         // Add fluids
         for (Map.Entry<ResourceKey<Fluid>, Fluid> fluidEntry : BuiltInRegistries.FLUID.entrySet()) {
-            tasks.set(tasks.get() + 1);
-            String baseFilename = ImageExportUtil.genBaseFilenameFromFluid(fluidEntry.getKey());
-            exportTasks.add((guiGraphics) -> {
-                taskProcessed.set(taskProcessed.get() + 1);
-                signalStatus(tasks, taskProcessed);
-                guiGraphics.fill(0, 0, scaleModifiedRounded, scaleModifiedRounded, BACKGROUND_COLOR);
-                ItemRenderUtil.renderFluid(guiGraphics, fluidEntry.getValue(), scaleModified, this.helpers);
-                ImageExportUtil.exportImageFromScreenshot(baseDir, baseFilename, this.scaleImage, BACKGROUND_COLOR_SHIFTED, this.mod);
-            });
+            if (shouldExport(fluidEntry.getKey().location())) {
+                tasks.set(tasks.get() + 1);
+                String baseFilename = ImageExportUtil.genBaseFilenameFromFluid(fluidEntry.getKey());
+                exportTasks.add((guiGraphics) -> {
+                    taskProcessed.set(taskProcessed.get() + 1);
+                    signalStatus(tasks, taskProcessed);
+                    guiGraphics.fill(0, 0, scaleModifiedRounded, scaleModifiedRounded, BACKGROUND_COLOR);
+                    ItemRenderUtil.renderFluid(guiGraphics, fluidEntry.getValue(), scaleModified, this.helpers);
+                    ImageExportUtil.exportImageFromScreenshot(baseDir, baseFilename, this.scaleImage, BACKGROUND_COLOR_SHIFTED, this.mod);
+                });
+            }
         }
 
         // Add items
@@ -121,18 +134,20 @@ public class ScreenIconExporter extends Screen {
         );
         for (CreativeModeTab creativeModeTab : this.helpers.getCreativeTabs()) {
             for (ItemStack itemStack : creativeModeTab.getDisplayItems()) {
-                tasks.set(tasks.get() + 1);
-                String baseFilename = ImageExportUtil.genBaseFilenameFromItem(lookupProvider, itemStack, this.mod, this.helpers);
-                exportTasks.add((guiGraphics) -> {
-                    taskProcessed.set(taskProcessed.get() + 1);
-                    signalStatus(tasks, taskProcessed);
-                    guiGraphics.fill(0, 0, scaleModifiedRounded, scaleModifiedRounded, BACKGROUND_COLOR);
-                    ItemRenderUtil.renderItem(guiGraphics, itemStack, scaleModified);
-                    ImageExportUtil.exportImageFromScreenshot(baseDir, baseFilename, this.scaleImage, BACKGROUND_COLOR_SHIFTED, this.mod);
-                    if (!itemStack.getComponents().isEmpty() && GeneralConfig.fileNameHashComponents) {
-                        ImageExportUtil.exportNbtFile(lookupProvider, baseDir, baseFilename, itemStack.getComponentsPatch(), this.mod, this.helpers);
-                    }
-                });
+                if (shouldExport(BuiltInRegistries.ITEM.getKey(itemStack.getItem()))) {
+                    tasks.set(tasks.get() + 1);
+                    String baseFilename = ImageExportUtil.genBaseFilenameFromItem(lookupProvider, itemStack, this.mod, this.helpers);
+                    exportTasks.add((guiGraphics) -> {
+                        taskProcessed.set(taskProcessed.get() + 1);
+                        signalStatus(tasks, taskProcessed);
+                        guiGraphics.fill(0, 0, scaleModifiedRounded, scaleModifiedRounded, BACKGROUND_COLOR);
+                        ItemRenderUtil.renderItem(guiGraphics, itemStack, scaleModified);
+                        ImageExportUtil.exportImageFromScreenshot(baseDir, baseFilename, this.scaleImage, BACKGROUND_COLOR_SHIFTED, this.mod);
+                        if (!itemStack.getComponents().isEmpty() && GeneralConfig.fileNameHashComponents) {
+                            ImageExportUtil.exportNbtFile(lookupProvider, baseDir, baseFilename, itemStack.getComponentsPatch(), this.mod, this.helpers);
+                        }
+                    });
+                }
             }
         }
 

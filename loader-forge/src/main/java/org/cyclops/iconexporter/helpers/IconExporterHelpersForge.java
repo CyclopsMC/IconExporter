@@ -36,9 +36,11 @@ public class IconExporterHelpersForge extends IconExporterHelpersCommon {
     @Override
     public String getModName(String modId) {
         Optional<? extends ModContainer> mod = ModList.get().getModContainerById(modId);
-        return mod
-                .map(modContainer -> modContainer.getModInfo().getDisplayName())
-                .orElse("Minecraft");
+        // Can not be converted to the functional style, as the Java compiler trips over it for some reason.
+        if (mod.isPresent()) {
+            return mod.get().getModInfo().getModId().toString();
+        }
+        return "Minecraft";
     }
 
     @Override

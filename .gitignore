@@ -30,3 +30,6 @@ extra-mods
 # Ignore files specific to dev environments
 secrets.properties
 changelog.txt
+
+loader-neoforge/.cache
+loader-neoforge/config

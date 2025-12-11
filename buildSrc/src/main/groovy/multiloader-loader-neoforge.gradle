@@ -2,7 +2,7 @@
 
 plugins {
     id 'multiloader-loader'
-    id 'net.neoforged.gradle.userdev'
+    id 'net.neoforged.moddev'
 }
 
 // All jar files from this folder will be added automatically as runtime mod dependencies (inspired by AE2's build.gradle)
@@ -16,10 +16,13 @@ repositories {
 }
 
 dependencies {
-    implementation "net.neoforged:neoforge:${neoforge_version}"
-
-    testImplementation "junit:junit:4.12"
-    testImplementation "org.mockito:mockito-core:1.+"
+    testImplementation 'org.junit.jupiter:junit-jupiter:5.7.1'
+    testImplementation 'org.junit.jupiter:junit-jupiter-params:5.7.1'
+    testImplementation 'org.junit.platform:junit-platform-suite-api:1.14.1'
+    testImplementation 'org.hamcrest:hamcrest:2.1'
+    testImplementation "org.mockito:mockito-core:2.+"
+    testRuntimeOnly 'org.junit.platform:junit-platform-suite-engine'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 
     // Locally sourced extra mods for runtime (i.e. testing)
     for (extraModJar in fileTree(dir: extraModsDir, include: '*.jar')) {
@@ -34,45 +37,45 @@ dependencies {
 
 sourceSets.main.resources { srcDir 'src/generated/resources' }
 
-minecraft {
+neoForge {
+    version = "${neoforge_version}"
+
+    parchment {
+        mappingsVersion = "${parchment_version}"
+        minecraftVersion = "${parchment_minecraft_version}"
+    }
+
     // Automatically enable neoforge AccessTransformers if the file exists
     def at = project(':loader-common').file('src/main/resources/META-INF/accesstransformer.cfg')
     if (at.exists()) {
-        accessTransformers {
-            file(at.absolutePath)
+        accessTransformers = [ at.absolutePath ]
+    }
+
+    // TODO: enable this once the Forge ATs change format
+//    validateAccessTransformers = true
+
+    runs {
+        client {
+            client()
+        }
+        server {
+            server()
+            programArgument '--nogui'
+        }
+        gameTestServer {
+            type = "gameTestServer"
+        }
+        configureEach {
+            systemProperty 'forge.logging.markers', 'REGISTRIES'
+            logLevel = org.slf4j.event.Level.DEBUG
+            systemProperty 'neoforge.enabledGameTestNamespaces', "cyclopscore,${mod_id}"
         }
     }
-}
 
-subsystems {
-    parchment {
-        minecraftVersion = "${parchment_minecraft_version}"
-        mappingsVersion = "${parchment_version}"
-    }
-}
-
-runs {
-    configureEach {
-        systemProperty 'neoforge.logging.markers', 'REGISTRIES'
-        systemProperty 'neoforge.logging.console.level', 'debug'
-        modSource project.sourceSets.main
-    }
-
-    client {
-        systemProperty 'neoforge.enabledGameTestNamespaces', "cyclopscore,${mod_id}"
-    }
-
-    server {
-        systemProperty 'neoforge.enabledGameTestNamespaces', "cyclopscore,${mod_id}"
-        argument '--nogui'
-    }
-
-    gameTestServer {
-        systemProperty 'neoforge.enabledGameTestNamespaces', "cyclopscore,${mod_id}"
-    }
-
-     clientData {
-        arguments.addAll '--mod', mod_id, '--all', '--output', file('src/generated/resources/').getAbsolutePath(), '--existing', file('src/main/resources/').getAbsolutePath()
+    mods {
+        "${mod_id}" {
+            sourceSet(sourceSets.main)
+        }
     }
 }
 

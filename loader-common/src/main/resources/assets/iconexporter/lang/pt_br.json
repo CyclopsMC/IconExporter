@@ -1,1 +1,8 @@
-{}
+{
+  "_comment": "General",
+  "gui.itemexporter.name": "Exportador de Ícone",
+  "gui.itemexporter.finished": "Exportação concluída",
+  "gui.itemexporter.error": "Erro ao exportar",
+  "gui.itemexporter.status": "Renderizando %s / %s",
+  "gui.itemexporter.metadata_export.success": "Arquivo de metadados exportado para %s"
+}

@@ -36,7 +36,7 @@ task publishCurseForge(type: TaskPublishCurseForge) {
     mainFile.addModLoader("Quilt")
 
     mainFile.addRequirement("cyclops-core")
-    mainFile.addOptional("forge-config-api-port-fabric")
+//    mainFile.addOptional("forge-config-api-port-fabric")
 }
 
 modrinth {

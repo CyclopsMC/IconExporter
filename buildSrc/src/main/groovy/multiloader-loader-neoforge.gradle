@@ -96,13 +96,9 @@ neoForge {
 //}
 
 // Measure coverage for game tests
-tasks.whenTaskAdded { task ->
-    if (task.name.equals('runGameTestServer')) {
-        jacocoTestReport.dependsOn test, task
-        jacoco.applyTo(task)
-    }
-}
 jacocoTestReport {
     // Include unit and game test coverage
+    dependsOn test, runGameTestServer
     executionData fileTree(project.buildDir).include("jacoco/*.exec")
 }
+jacoco.applyTo(runGameTestServer)

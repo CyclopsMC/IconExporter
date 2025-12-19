@@ -2,6 +2,7 @@
 
 plugins {
     id 'multiloader-loader'
+    id 'net.minecraftforge.accesstransformers'
     id 'net.minecraftforge.gradle'
 }
 
@@ -9,6 +10,9 @@ plugins {
 def extraModsDir = "extra-mods"
 
 repositories {
+    maven minecraft.mavenizer
+    maven fg.forgeMaven
+    maven fg.minecraftLibsMaven
     flatDir {
         name "extra-mods"
         dir file(extraModsDir)
@@ -16,8 +20,8 @@ repositories {
 }
 
 dependencies {
-    minecraft "net.minecraftforge:forge:${minecraft_version}-${forge_version}"
-    annotationProcessor 'net.minecraftforge:eventbus-validator:7.0-beta.7'
+    implementation minecraft.dependency("net.minecraftforge:forge:${minecraft_version}-${forge_version}")
+    annotationProcessor 'net.minecraftforge:eventbus-validator:7.0-beta.10'
 
     testImplementation "junit:junit:4.12"
     testImplementation "org.mockito:mockito-core:1.+"
@@ -41,66 +45,37 @@ sourceSets.main.resources { srcDir 'src/generated/resources' }
 minecraft {
     mappings channel: 'official', version: minecraft_version
 
-    reobf = false
-
-    copyIdeResources.set(true)
-
     // Automatically enable neoforge AccessTransformers if the file exists
     def at = project(':loader-common').file('src/main/resources/META-INF/accesstransformer.cfg')
     if (at.exists()) {
-        accessTransformer = file(at.absolutePath)
+        accessTransformers = '../../../../loader-common/src/main/resources/META-INF/accesstransformer.cfg'
     }
 
     runs {
-        client {
-            property 'forge.enabledGameTestNamespaces', "cyclopscore,${mod_id}"
-            property 'eventbus.api.strictRuntimeChecks', 'true'
-            workingDirectory file('runs/client')
-            ideaModule "${rootProject.name}.${project.name}.main"
-            taskName 'Client'
-            mods {
-                modClientRun {
-                    source sourceSets.main
-                }
-            }
+        configureEach {
+            workingDir.convention layout.projectDirectory.dir('run')
+            //systemProperty 'forge.logging.markers', 'REGISTRIES'
+            systemProperty 'forge.logging.console.level', 'debug'
+            systemProperty 'eventbus.api.strictRuntimeChecks', 'true'
         }
 
-        server {
-            property 'forge.enabledGameTestNamespaces', "cyclopscore,${mod_id}"
-            property 'eventbus.api.strictRuntimeChecks', 'true'
+        register('client') {
+            systemProperty 'forge.enabledGameTestNamespaces', "cyclopscore,${mod_id}"
+            jvmArgs "-XstartOnFirstThread" // Fixes startup error
+        }
+
+        register('server') {
+            systemProperty 'forge.enabledGameTestNamespaces', "cyclopscore,${mod_id}"
             args '--nogui'
-            workingDirectory file('runs/server')
-            ideaModule "${rootProject.name}.${project.name}.main"
-            taskName 'Server'
-            mods {
-                modServerRun {
-                    source sourceSets.main
-                }
-            }
         }
 
-        gameTestServer {
-            property 'forge.enabledGameTestNamespaces', "cyclopscore,${mod_id}"
-            workingDirectory file('runs/gametest')
-            ideaModule "${rootProject.name}.${project.name}.main"
-            taskName 'runGameTestServer'
-            mods {
-                modDataRun {
-                    source sourceSets.main
-                }
-            }
+        register('gameTestServer') {
+            systemProperty 'forge.enabledGameTestNamespaces', "cyclopscore,${mod_id}"
         }
 
-        data {
-            workingDirectory file('runs/data')
-            ideaModule "${rootProject.name}.${project.name}.main"
-            args '--mod', mod_id, '--all', '--output', file('src/generated/resources/'), '--existing', file('src/main/resources/')
-            taskName 'Data'
-            mods {
-                modDataRun {
-                    source sourceSets.main
-                }
-            }
+        register('data') {
+            workingDir = layout.projectDirectory.dir('run-data')
+            args '--mod', mod_id, '--all', '--output', layout.projectDirectory.dir('src/generated/resources'), '--existing', layout.projectDirectory.dir('src/main/resources')
         }
     }
 }

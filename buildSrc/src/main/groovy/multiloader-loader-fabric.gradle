@@ -2,7 +2,7 @@
 
 plugins {
     id 'multiloader-loader'
-    id 'fabric-loom'
+    id 'net.fabricmc.fabric-loom-remap'
 }
 dependencies {
     minecraft "com.mojang:minecraft:${minecraft_version}"
@@ -66,7 +66,7 @@ publishing {
     publications { PublicationContainer publicationContainer ->
         publicationContainer.getByName("maven") { MavenPublication publication ->
             publication.artifacts = [remapJar, javadocJar, deobfJar, remapSourcesJar]
-            publication.artifactId = project.archivesBaseName.toLowerCase() // GH can't handle uppercase...
+            publication.artifactId = project.base.archivesName.get().toLowerCase() // GH can't handle uppercase...
         }
     }
 }

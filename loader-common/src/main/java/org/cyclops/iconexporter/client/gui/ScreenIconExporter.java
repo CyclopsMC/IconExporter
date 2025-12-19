@@ -10,7 +10,7 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraft.world.item.ItemStack;
@@ -93,7 +93,7 @@ public class ScreenIconExporter extends Screen {
         }
     }
 
-    protected boolean shouldExport(ResourceLocation resourceLocation) {
+    protected boolean shouldExport(Identifier resourceLocation) {
         return this.modId == null || (modIdRegex ? resourceLocation.getNamespace().matches(this.modId) : resourceLocation.getNamespace().equals(this.modId));
     }
 
@@ -112,7 +112,7 @@ public class ScreenIconExporter extends Screen {
 
         // Add fluids
         for (Map.Entry<ResourceKey<Fluid>, Fluid> fluidEntry : BuiltInRegistries.FLUID.entrySet()) {
-            if (shouldExport(fluidEntry.getKey().location())) {
+            if (shouldExport(fluidEntry.getKey().identifier())) {
                 tasks.set(tasks.get() + 1);
                 String baseFilename = ImageExportUtil.genBaseFilenameFromFluid(fluidEntry.getKey());
                 exportTasks.add((guiGraphics) -> {

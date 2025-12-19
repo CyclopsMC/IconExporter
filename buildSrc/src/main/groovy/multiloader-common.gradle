@@ -248,7 +248,7 @@ publishing {
     publications { PublicationContainer publicationContainer ->
         publicationContainer.register("maven", MavenPublication) { MavenPublication publication ->
             publication.artifacts = [jar, javadocJar, deobfJar, sourcesJar]
-            publication.artifactId = project.archivesBaseName.toLowerCase() // GH can't handle uppercase...
+            publication.artifactId = project.base.archivesName.get().toLowerCase() // GH can't handle uppercase...
         }
     }
 }

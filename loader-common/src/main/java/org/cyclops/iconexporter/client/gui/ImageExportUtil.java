@@ -35,7 +35,7 @@ public class ImageExportUtil {
    }
 
     public static String genBaseFilenameFromFluid(ResourceKey<Fluid> fluid) {
-        return escapeKey("fluid__" + fluid.location());
+        return escapeKey("fluid__" + fluid.identifier());
     }
 
     public static String genBaseFilenameFromItem(HolderLookup.Provider lookupProvider, ItemStack itemStack, IModBase mod, IIconExporterHelpers helpers) {

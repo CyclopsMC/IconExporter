@@ -4,7 +4,7 @@ plugins {
 	id 'com.modrinth.minotaur' version '2.+' apply false
 
 	id 'net.fabricmc.fabric-loom-remap' version '1.14-SNAPSHOT' apply false
-	id 'net.neoforged.moddev' version '2.0.126' apply false
+	id 'net.neoforged.moddev' version '2.0.137' apply false
 	id 'net.minecraftforge.accesstransformers' version '5.0.3' apply false
 	id 'net.minecraftforge.gradle' version '7.0.0-beta.55' apply false
 }

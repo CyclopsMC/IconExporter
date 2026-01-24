@@ -6,3 +6,11 @@ accessible method net/minecraft/util/thread/BlockableEventLoop submitAsync (Ljav
 
 accessible field net/minecraft/client/renderer/GameRenderer guiRenderer Lnet/minecraft/client/gui/render/GuiRenderer;
 accessible field net/minecraft/client/renderer/GameRenderer fogRenderer Lnet/minecraft/client/renderer/fog/FogRenderer;
+
+accessible field net/minecraft/client/gui/GuiGraphics guiRenderState Lnet/minecraft/client/gui/render/state/GuiRenderState;
+accessible field net/minecraft/client/gui/GuiGraphics scissorStack Lnet/minecraft/client/gui/GuiGraphics$ScissorStack;
+accessible class net/minecraft/client/gui/GuiGraphics$ScissorStack
+accessible method net/minecraft/client/gui/GuiGraphics$ScissorStack peek ()Lnet/minecraft/client/gui/navigation/ScreenRectangle;
+accessible field net/minecraft/client/gui/render/state/GuiItemRenderState bounds Lnet/minecraft/client/gui/navigation/ScreenRectangle;
+mutable field net/minecraft/client/gui/render/state/GuiItemRenderState bounds Lnet/minecraft/client/gui/navigation/ScreenRectangle;
+accessible method net/minecraft/client/gui/render/state/GuiItemRenderState calculateBounds (Lnet/minecraft/client/gui/navigation/ScreenRectangle;)Lnet/minecraft/client/gui/navigation/ScreenRectangle;

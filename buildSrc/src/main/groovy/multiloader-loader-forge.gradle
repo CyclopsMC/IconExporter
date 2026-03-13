@@ -48,7 +48,7 @@ minecraft {
     // Automatically enable neoforge AccessTransformers if the file exists
     def at = project(':loader-common').file('src/main/resources/META-INF/accesstransformer.cfg')
     if (at.exists()) {
-        accessTransformers = '../../../../loader-common/src/main/resources/META-INF/accesstransformer.cfg'
+        accessTransformers = files(at.absolutePath)
     }
 
     runs {

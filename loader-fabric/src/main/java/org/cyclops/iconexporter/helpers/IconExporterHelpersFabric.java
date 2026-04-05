@@ -6,7 +6,7 @@ import net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariant;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariantAttributes;
 import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.loader.api.ModContainer;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.level.material.Fluid;
@@ -32,7 +32,7 @@ public class IconExporterHelpersFabric extends IconExporterHelpersCommon {
     }
 
     @Override
-    public void renderFluidSlot(GuiGraphics gui, Fluid fluid) {
+    public void renderFluidSlot(GuiGraphicsExtractor gui, Fluid fluid) {
         IModHelpersFabric.get().getGuiHelpers().renderFluidSlot(gui, FluidVariant.of(fluid), IModHelpersFabric.get().getFluidHelpers().getBucketVolume(), 0, 0);
     }
 

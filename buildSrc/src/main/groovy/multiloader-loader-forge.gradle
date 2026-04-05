@@ -22,6 +22,7 @@ repositories {
 dependencies {
     implementation minecraft.dependency("net.minecraftforge:forge:${minecraft_version}-${forge_version}")
     annotationProcessor 'net.minecraftforge:eventbus-validator:7.0-beta.10'
+    annotationProcessor 'org.spongepowered:mixin:0.8.7:processor'
 
     testImplementation "junit:junit:4.12"
     testImplementation "org.mockito:mockito-core:1.+"
@@ -57,6 +58,8 @@ minecraft {
             //systemProperty 'forge.logging.markers', 'REGISTRIES'
             systemProperty 'forge.logging.console.level', 'debug'
             systemProperty 'eventbus.api.strictRuntimeChecks', 'true'
+            // Mixin requires the config to be specified via command line in a dev environment
+            args "--mixin.config=mixins.${mod_id}.json"
         }
 
         register('client') {
@@ -77,6 +80,13 @@ minecraft {
             workingDir = layout.projectDirectory.dir('run-data')
             args '--mod', mod_id, '--all', '--output', layout.projectDirectory.dir('src/generated/resources'), '--existing', layout.projectDirectory.dir('src/main/resources')
         }
+    }
+}
+
+tasks.named('jar', Jar) {
+    manifest {
+        // Tell Mixin about our config so it is detected at runtime (in production)
+        attributes['MixinConfigs'] = "mixins.${mod_id}.json"
     }
 }
 

@@ -17,17 +17,6 @@ pluginManagement {
         exclusiveContent {
             forRepository {
                 maven {
-                    name = 'Parchment'
-                    url = uri('https://maven.parchmentmc.org')
-                }
-            }
-            filter {
-                includeGroupByRegex("org\\.parchmentmc.*")
-            }
-        }
-        exclusiveContent {
-            forRepository {
-                maven {
                     name = 'Fabric'
                     url = uri('https://maven.fabricmc.net')
                 }

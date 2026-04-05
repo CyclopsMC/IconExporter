@@ -94,7 +94,7 @@ public class CommandExportMetadata implements Command<CommandSourceStack> {
                     jsonMeta.add(itemToJson(this.context, itemStack));
                 } catch (Exception e) {
                     e.printStackTrace();
-                    Minecraft.getInstance().player.displayClientMessage(Component.translatable("gui.itemexporter.error"), false);
+                    Minecraft.getInstance().player.sendSystemMessage(Component.translatable("gui.itemexporter.error"));
                 }
             }
         }
@@ -105,7 +105,7 @@ public class CommandExportMetadata implements Command<CommandSourceStack> {
                 jsonMeta.add(fluidToJson(fluidEntry));
             } catch (Exception e) {
                 e.printStackTrace();
-                Minecraft.getInstance().player.displayClientMessage(Component.translatable("gui.itemexporter.error"), false);
+                Minecraft.getInstance().player.sendSystemMessage(Component.translatable("gui.itemexporter.error"));
             }
         }
 
@@ -123,7 +123,7 @@ public class CommandExportMetadata implements Command<CommandSourceStack> {
             throw new RuntimeException(e);
         }
 
-        Minecraft.getInstance().player.displayClientMessage(Component.translatable("gui.itemexporter.metadata_export.success", f.getAbsolutePath()), false);
+        Minecraft.getInstance().player.sendSystemMessage(Component.translatable("gui.itemexporter.metadata_export.success", f.getAbsolutePath()));
 
         return 0;
     }

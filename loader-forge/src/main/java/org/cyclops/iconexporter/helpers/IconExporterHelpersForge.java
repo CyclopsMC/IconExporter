@@ -1,7 +1,7 @@
 package org.cyclops.iconexporter.helpers;
 
 import com.mojang.brigadier.arguments.ArgumentType;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraftforge.common.CreativeModeTabRegistry;
@@ -29,13 +29,13 @@ public class IconExporterHelpersForge extends IconExporterHelpersCommon {
     }
 
     @Override
-    public void renderFluidSlot(GuiGraphics gui, Fluid fluid) {
+    public void renderFluidSlot(GuiGraphicsExtractor gui, Fluid fluid) {
         IModHelpersForge.get().getGuiHelpers().renderFluidSlot(gui, new FluidStack(fluid, IModHelpersForge.get().getFluidHelpers().getBucketVolume()), 0, 0);
     }
 
     @Override
     public String getModName(String modId) {
-        Optional<? extends ModContainer> mod = ModList.get().getModContainerById(modId);
+        Optional<? extends ModContainer> mod = ModList.getModContainerById(modId);
         // Can not be converted to the functional style, as the Java compiler trips over it for some reason.
         if (mod.isPresent()) {
             return mod.get().getModInfo().getModId().toString();

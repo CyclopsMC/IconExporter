@@ -40,19 +40,13 @@ sourceSets.main.resources { srcDir 'src/generated/resources' }
 neoForge {
     version = "${neoforge_version}"
 
-    parchment {
-        mappingsVersion = "${parchment_version}"
-        minecraftVersion = "${parchment_minecraft_version}"
-    }
-
     // Automatically enable neoforge AccessTransformers if the file exists
     def at = project(':loader-common').file('src/main/resources/META-INF/accesstransformer.cfg')
     if (at.exists()) {
         accessTransformers = [ at.absolutePath ]
     }
 
-    // TODO: enable this once the Forge ATs change format
-//    validateAccessTransformers = true
+    validateAccessTransformers = true
 
     runs {
         client {

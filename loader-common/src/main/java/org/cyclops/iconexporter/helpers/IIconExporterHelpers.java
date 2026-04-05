@@ -1,7 +1,7 @@
 package org.cyclops.iconexporter.helpers;
 
 import com.mojang.brigadier.arguments.ArgumentType;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.component.DataComponentPatch;
 import net.minecraft.world.item.CreativeModeTab;
@@ -20,7 +20,7 @@ public interface IIconExporterHelpers {
 
     public String getFluidLocalName(Fluid fluid);
 
-    public void renderFluidSlot(GuiGraphics gui, Fluid fluid);
+    public void renderFluidSlot(GuiGraphicsExtractor gui, Fluid fluid);
 
     public String getModName(String modId);
 

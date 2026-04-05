@@ -16,7 +16,6 @@ import org.apache.logging.log4j.Level;
 import org.cyclops.cyclopscore.init.IModBase;
 import org.cyclops.iconexporter.GeneralConfig;
 import org.cyclops.iconexporter.helpers.IIconExporterHelpers;
-import org.lwjgl.system.MemoryUtil;
 
 import java.io.File;
 import java.io.IOException;
@@ -114,14 +113,7 @@ public class ImageExportUtil {
 
     public static NativeImage getSubImage(NativeImage image, int width, int height) {
         NativeImage imageNew = new NativeImage(width, height, false);
-
-        // Modified from NativeImage#copyImageData
-        for(int y = 0; y < imageNew.getHeight(); y++) {
-            int pointerOffset = y * image.getWidth() * image.format().components();
-            int pointerOffsetNew = y * imageNew.getWidth() * imageNew.format().components();
-            MemoryUtil.memCopy(image.pixels + (long)pointerOffset, imageNew.pixels + (long)pointerOffsetNew, (long)imageNew.getWidth() * image.format().components()); // changed here to multiply number of bytes with pixel size
-        }
-
+        image.copyRect(imageNew, 0, 0, 0, 0, width, height, false, false);
         return imageNew;
     }
 

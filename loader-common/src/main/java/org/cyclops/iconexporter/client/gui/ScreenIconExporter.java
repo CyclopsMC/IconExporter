@@ -2,15 +2,15 @@ package org.cyclops.iconexporter.client.gui;
 
 import com.google.common.collect.Queues;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.renderer.fog.FogRenderer;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraft.world.item.ItemStack;
@@ -63,25 +63,25 @@ public class ScreenIconExporter extends Screen {
     }
 
     @Override
-    public void render(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTicks) {
-        super.render(guiGraphics, mouseX, mouseY, partialTicks);
+    public void extractRenderState(GuiGraphicsExtractor guiGraphics, int mouseX, int mouseY, float partialTicks) {
+        super.extractRenderState(guiGraphics, mouseX, mouseY, partialTicks);
 
         if (exportTasks.isEmpty()) {
             Minecraft.getInstance().setScreen(null);
-            Minecraft.getInstance().player.displayClientMessage(Component.translatable("gui.itemexporter.finished"), false);
+            Minecraft.getInstance().player.sendOverlayMessage(Component.translatable("gui.itemexporter.finished"));
         } else {
             IExportTask task = exportTasks.poll();
             try {
                 task.run(guiGraphics);
             } catch (IOException e) {
-                Minecraft.getInstance().player.displayClientMessage(Component.translatable("gui.itemexporter.error"), false);
+                Minecraft.getInstance().player.sendOverlayMessage(Component.translatable("gui.itemexporter.error"));
                 e.printStackTrace();
             }
         }
     }
 
     @Override
-    protected void renderBlurredBackground(GuiGraphics guiGraphics) {
+    protected void extractBlurredBackground(GuiGraphicsExtractor guiGraphics) {
         // Do nothing
     }
 
@@ -160,7 +160,9 @@ public class ScreenIconExporter extends Screen {
     }
 
     protected void signalStatus(Wrapper<Integer> tasks, Wrapper<Integer> taskProcessed) {
-        Minecraft.getInstance().player.displayClientMessage(Component.translatable("gui.itemexporter.status", taskProcessed.get(), tasks.get()), true);
+        // TODO: This is not working since 26.1, possibly due to out manual render buffer flushing.
+        //  Not a huge problem, but would be nice to have fixed.
+        Minecraft.getInstance().player.sendOverlayMessage(Component.translatable("gui.itemexporter.status", taskProcessed.get(), tasks.get()));
     }
 
 }

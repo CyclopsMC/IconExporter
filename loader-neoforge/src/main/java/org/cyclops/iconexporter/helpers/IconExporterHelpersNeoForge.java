@@ -1,7 +1,7 @@
 package org.cyclops.iconexporter.helpers;
 
 import com.mojang.brigadier.arguments.ArgumentType;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.level.material.Fluid;
 import net.neoforged.fml.ModContainer;
@@ -29,7 +29,7 @@ public class IconExporterHelpersNeoForge extends IconExporterHelpersCommon {
     }
 
     @Override
-    public void renderFluidSlot(GuiGraphics gui, Fluid fluid) {
+    public void renderFluidSlot(GuiGraphicsExtractor gui, Fluid fluid) {
         IModHelpersNeoForge.get().getGuiHelpers().renderFluidSlot(gui, new FluidStack(fluid, IModHelpersNeoForge.get().getFluidHelpers().getBucketVolume()), 0, 0);
     }
 

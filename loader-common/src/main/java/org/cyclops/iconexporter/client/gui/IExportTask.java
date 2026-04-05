@@ -1,6 +1,6 @@
 package org.cyclops.iconexporter.client.gui;
 
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 
 import java.io.IOException;
 
@@ -9,6 +9,6 @@ import java.io.IOException;
  */
 public interface IExportTask {
 
-    public void run(GuiGraphics guiGraphics) throws IOException;
+    public void run(GuiGraphicsExtractor guiGraphics) throws IOException;
 
 }

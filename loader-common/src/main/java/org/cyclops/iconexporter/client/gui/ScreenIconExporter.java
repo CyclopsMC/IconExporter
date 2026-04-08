@@ -5,6 +5,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.renderer.fog.FogRenderer;
+import net.minecraft.client.renderer.state.WindowRenderState;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.Tag;
@@ -98,8 +99,15 @@ public class ScreenIconExporter extends Screen {
     }
 
     public Queue<IExportTask> createExportTasks() {
-        float scaleModified = (float) (this.scaleImage / this.scaleGui);
-        int scaleModifiedRounded = (int) Math.ceil(scaleModified);
+        // Compute a guiScale that makes the item atlas render at scaleImage pixels per slot.
+        // GuiRenderer uses slotTextureSize = 16 * guiScale, so guiScale = scaleImage / 16 gives
+        // slotTextureSize = scaleImage. With this guiScale, items drawn at natural 16x16 GUI units
+        // will occupy exactly scaleImage x scaleImage physical pixels.
+        int exportGuiScale = Math.max(1, this.scaleImage / 16);
+        // Natural item slot size in GUI units (rendered at exportGuiScale px/unit = scaleImage px).
+        int drawSize = 16;
+        // Captured once; windowRenderState is a stable final field of the singleton GameRenderState.
+        WindowRenderState windowRenderState = Minecraft.getInstance().gameRenderer.getGameRenderState().windowRenderState;
 
         // Initialize our output folder
         File baseDir = new File(Minecraft.getInstance().gameDirectory, "icon-exports-x" + this.scaleImage);
@@ -118,9 +126,12 @@ public class ScreenIconExporter extends Screen {
                 exportTasks.add((guiGraphics) -> {
                     taskProcessed.set(taskProcessed.get() + 1);
                     signalStatus(tasks, taskProcessed);
-                    guiGraphics.fill(0, 0, scaleModifiedRounded, scaleModifiedRounded, BACKGROUND_COLOR);
-                    ItemRenderUtil.renderFluid(guiGraphics, fluidEntry.getValue(), scaleModified, this.helpers);
+                    int originalGuiScale = windowRenderState.guiScale;
+                    windowRenderState.guiScale = exportGuiScale;
+                    guiGraphics.fill(0, 0, drawSize, drawSize, BACKGROUND_COLOR);
+                    ItemRenderUtil.renderFluid(guiGraphics, fluidEntry.getValue(), drawSize, this.helpers);
                     flushRenderBuffer();
+                    windowRenderState.guiScale = originalGuiScale;
                     ImageExportUtil.exportImageFromScreenshot(baseDir, baseFilename, this.scaleImage, BACKGROUND_COLOR, this.mod);
                 });
             }
@@ -140,9 +151,12 @@ public class ScreenIconExporter extends Screen {
                     exportTasks.add((guiGraphics) -> {
                         taskProcessed.set(taskProcessed.get() + 1);
                         signalStatus(tasks, taskProcessed);
-                        guiGraphics.fill(0, 0, scaleModifiedRounded, scaleModifiedRounded, BACKGROUND_COLOR);
-                        ItemRenderUtil.renderItem(guiGraphics, itemStack, scaleModified);
+                        int originalGuiScale = windowRenderState.guiScale;
+                        windowRenderState.guiScale = exportGuiScale;
+                        guiGraphics.fill(0, 0, drawSize, drawSize, BACKGROUND_COLOR);
+                        ItemRenderUtil.renderItem(guiGraphics, itemStack, drawSize);
                         flushRenderBuffer();
+                        windowRenderState.guiScale = originalGuiScale;
                         ImageExportUtil.exportImageFromScreenshot(baseDir, baseFilename, this.scaleImage, BACKGROUND_COLOR, this.mod);
                         if (!itemStack.getComponents().isEmpty() && GeneralConfig.fileNameHashComponents) {
                             ImageExportUtil.exportNbtFile(lookupProvider, baseDir, baseFilename, itemStack.getComponentsPatch(), this.mod, this.helpers);

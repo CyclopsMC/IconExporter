@@ -69,11 +69,11 @@ minecraft {
 
         register('server') {
             systemProperty 'forge.enabledGameTestNamespaces', "cyclopscore,${mod_id}"
-            args '--nogui'
         }
 
         register('gameTestServer') {
             systemProperty 'forge.enabledGameTestNamespaces', "cyclopscore,${mod_id}"
+            systemProperty 'net.minecraftforge.launcher.skip.assets', 'true'
         }
 
         register('data') {

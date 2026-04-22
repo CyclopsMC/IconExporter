@@ -25,7 +25,7 @@
   "accessWidener" : "iconexporter.accesswidener",
 
   "depends": {
-    "cyclopscore": ">=${cyclopscore_version_semver}",
+    "cyclopscore": ">=${cyclopscore_version}",
     "fabricloader": ">=${fabric_loader_version}",
     "fabric-api": ">=${fabric_version}",
     "java": ">=${java_version}"

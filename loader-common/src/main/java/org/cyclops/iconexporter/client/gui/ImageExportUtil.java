@@ -101,7 +101,11 @@ public class ImageExportUtil {
         try {
             File file = new File(dir, baseFilename + ".txt").getCanonicalFile();
             try {
-                FileUtils.writeStringToFile(file, helpers.componentsToString(lookupProvider, components), Charsets.UTF_8);
+                try {
+                    FileUtils.writeStringToFile(file, helpers.componentsToString(lookupProvider, components), Charsets.UTF_8);
+                } catch (IllegalStateException e) {
+                    mod.log(e.getMessage());
+                }
             } catch (NullPointerException e) {
                 e.printStackTrace();
                 throw new IOException("Error while writing the TXT image " + file);

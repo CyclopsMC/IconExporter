@@ -1,8 +1,15 @@
 # Changelog for Minecraft 26.1.2
 All notable changes to this project will be documented in this file.
 
+<a name="26.1.2-1.4.2"></a>
+## [26.1.2-1.4.2](https://github.com/CyclopsMC/IconExporter/compare/26.1.2-1.4.1...26.1.2-1.4.2) - 2026-05-26 20:15:45
+
+
+### Fixed
+* Fix crash on invalid components when hashing is enabled
+
 <a name="26.1.2-1.4.1"></a>
-## [26.1.2-1.4.1](https://github.com/CyclopsMC/IconExporter/compare/26.1.2-1.4.0...26.1.2-1.4.1) - 2026-04-22 20:10:50
+## [26.1.2-1.4.1](https://github.com/CyclopsMC/IconExporter/compare/26.1.2-1.4.0...26.1.2-1.4.1) - 2026-04-22 20:10:50 +0200
 
 
 ### Fixed

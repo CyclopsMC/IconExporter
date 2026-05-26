@@ -1,0 +1,8 @@
+As always, don't forget to backup your world before updating!
+Requires CyclopsCore version 1.25.1 or higher.
+
+Additions:
+* Add translations through Crowdin (#34)
+
+Fixes:
+* Fix crash on invalid components when hashing is enabled

@@ -1,1 +1,8 @@
-{}
+{
+  "_comment": "Allgemein",
+  "gui.itemexporter.name": "Symbolexporter",
+  "gui.itemexporter.finished": "Export abgeschlossen",
+  "gui.itemexporter.error": "Fehler beim Exportieren",
+  "gui.itemexporter.status": "Rendere %s / %s",
+  "gui.itemexporter.metadata_export.success": "Metadatendatei unter %s exportiert"
+}

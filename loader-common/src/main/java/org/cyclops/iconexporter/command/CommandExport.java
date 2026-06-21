@@ -54,7 +54,7 @@ public class CommandExport implements Command<CommandSourceStack> {
 
         // Open the gui that will render the icons
         ScreenIconExporter exporter = new ScreenIconExporter(this.context, scale, Minecraft.getInstance().getWindow().getGuiScale(), modId, modIdRegex, this.mod, this.helpers);
-        Minecraft.getInstance().submitAsync(() -> Minecraft.getInstance().setScreen(exporter));
+        Minecraft.getInstance().submitAsync(() -> Minecraft.getInstance().gui.setScreen(exporter));
 
         return 0;
     }

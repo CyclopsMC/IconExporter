@@ -4,7 +4,6 @@ import com.google.common.collect.Queues;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.client.renderer.fog.FogRenderer;
 import net.minecraft.client.renderer.state.WindowRenderState;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -68,7 +67,7 @@ public class ScreenIconExporter extends Screen {
         super.extractRenderState(guiGraphics, mouseX, mouseY, partialTicks);
 
         if (exportTasks.isEmpty()) {
-            Minecraft.getInstance().setScreen(null);
+            Minecraft.getInstance().gui.setScreen(null);
             Minecraft.getInstance().player.sendOverlayMessage(Component.translatable("gui.itemexporter.finished"));
         } else {
             IExportTask task = exportTasks.poll();
@@ -107,7 +106,7 @@ public class ScreenIconExporter extends Screen {
         // Natural item slot size in GUI units (rendered at exportGuiScale px/unit = scaleImage px).
         int drawSize = 16;
         // Captured once; windowRenderState is a stable final field of the singleton GameRenderState.
-        WindowRenderState windowRenderState = Minecraft.getInstance().gameRenderer.getGameRenderState().windowRenderState;
+        WindowRenderState windowRenderState = Minecraft.getInstance().gameRenderer.gameRenderState().windowRenderState;
 
         // Initialize our output folder
         File baseDir = new File(Minecraft.getInstance().gameDirectory, "icon-exports-x" + this.scaleImage);
@@ -170,7 +169,7 @@ public class ScreenIconExporter extends Screen {
     }
 
     private void flushRenderBuffer() {
-        Minecraft.getInstance().gameRenderer.guiRenderer.render(Minecraft.getInstance().gameRenderer.fogRenderer.getBuffer(FogRenderer.FogMode.NONE));
+        Minecraft.getInstance().gameRenderer.guiRenderer.render();
     }
 
     protected void signalStatus(Wrapper<Integer> tasks, Wrapper<Integer> taskProcessed) {

@@ -59,7 +59,7 @@ public class ImageExportUtil {
 
     public static void exportImageFromScreenshot(File dir, String baseFilename, int scaleImage, int backgroundColor, IModBase mod) {
         // Take a screenshot
-        Screenshot.takeScreenshot(Minecraft.getInstance().getMainRenderTarget(), (imageFull) -> {
+        Screenshot.takeScreenshot(Minecraft.getInstance().gameRenderer.mainRenderTarget(), (imageFull) -> {
             NativeImage image = getSubImage(imageFull, scaleImage, scaleImage);
             imageFull.close();
 

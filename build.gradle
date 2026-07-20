@@ -1,6 +1,6 @@
 plugins {
     id 'net.minecraftforge.gradle' version '[6.0,6.2)'
-    id 'com.matthewprenger.cursegradle' version '1.4.0'
+    id 'net.darkhax.curseforgegradle' version '1.1.15'
     id 'com.diffplug.spotless' version '5.14.3'
 	id 'com.modrinth.minotaur' version '2.+'
 }
@@ -10,6 +10,8 @@ apply plugin: 'idea'
 apply plugin: 'maven-publish'
 
 import net.minecraftforge.gradle.common.tasks.SignJar
+import net.darkhax.curseforgegradle.Constants
+import net.darkhax.curseforgegradle.TaskPublishCurseForge
 
 // Determine build number
 String build_number = "DEV" // this will be referenced as simply build_number from now on.
@@ -202,32 +204,31 @@ artifacts {
     archives javadocJar
 }
 
-curseforge {
+task publishCurseForge(type: TaskPublishCurseForge) {
+    dependsOn(tasks.jar)
     if(secrets.curseforge_key) {
-        apiKey = secrets.curseforge_key
+        apiToken = secrets.curseforge_key
     } else if(System.getenv().GITHUB_ACTIONS && System.getenv().CURSEFORGE_KEY_SECRET) {
-        apiKey = System.getenv().CURSEFORGE_KEY_SECRET
+        apiToken = System.getenv().CURSEFORGE_KEY_SECRET
     }
-
-    project {
-        id = "327048" // my project url is http://minecraft.curseforge.com/mc-mods/327048/
-        releaseType = project.project.release_type
-		addGameVersion project.minecraft_version
-        mainArtifact(jar) {
-            relations {
-                requiredDependency 'cyclops-core'
-            }
-        }
-
-        changelog = ""
-        if (new File("resources/changelog/${project.version}.txt").exists()) {
-            changelog = new File("resources/changelog/${project.version}.txt").text
-        }
-
-        addArtifact deobfJar
-        addArtifact sourcesJar
-        addArtifact javadocJar
+    def mainFile = upload("327048", jar)
+    mainFile.releaseType = Constants.RELEASE_TYPE_RELEASE
+    mainFile.changelogType = "markdown"
+    mainFile.changelog = ""
+    if (new File("resources/changelog/${project.version}.txt").exists()) {
+        mainFile.changelog = new File("resources/changelog/${project.version}.txt").text
     }
+    mainFile.addGameVersion(project.minecraft_version, 'Client', 'Server')
+    mainFile.addModLoader("NeoForge")
+
+    mainFile.addRequirement("cyclops-core")
+
+    def deobfFile = mainFile.withAdditionalFile(deobfJar)
+    deobfFile.releaseType = mainFile.releaseType
+    def sourcesFile = mainFile.withAdditionalFile(sourcesJar)
+    sourcesFile.releaseType = mainFile.releaseType
+    def javadocFile = mainFile.withAdditionalFile(javadocJar)
+    javadocFile.releaseType = mainFile.releaseType
 }
 
 modrinth {

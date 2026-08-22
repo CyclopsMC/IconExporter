@@ -1,6 +1,14 @@
+buildscript {
+    configurations.classpath {
+        resolutionStrategy {
+            force 'net.minecraftforge:srgutils:0.6.2'
+        }
+    }
+}
+
 plugins {
     id 'net.darkhax.curseforgegradle' version '1.1.28' apply false
-    id 'com.diffplug.spotless' version '6.25.0' apply false
+    id 'com.diffplug.spotless' version '7.2.1' apply false
 	id 'com.modrinth.minotaur' version '2.+' apply false
 
 	id 'net.fabricmc.fabric-loom' version '1.15-SNAPSHOT' apply false

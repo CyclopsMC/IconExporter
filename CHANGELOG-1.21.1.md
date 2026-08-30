@@ -1,8 +1,15 @@
 # Changelog for Minecraft 1.21.1
 All notable changes to this project will be documented in this file.
 
+<a name="1.21.1-1.4.2"></a>
+## [1.21.1-1.4.2](https://github.com/CyclopsMC/IconExporter/compare/1.21.1-1.4.1...1.21.1-1.4.2) - 2026-08-30 11:55:30
+
+
+### Fixed
+* Fix some blocks being exported too dark (#41)
+
 <a name="1.21.1-1.4.1"></a>
-## [1.21.1-1.4.1](https://github.com/CyclopsMC/IconExporter/compare/1.21.1-1.4.0...1.21.1-1.4.1) - 2026-05-26 20:11:13
+## [1.21.1-1.4.1](https://github.com/CyclopsMC/IconExporter/compare/1.21.1-1.4.0...1.21.1-1.4.1) - 2026-05-26 20:11:13 +0200
 
 
 ### Added

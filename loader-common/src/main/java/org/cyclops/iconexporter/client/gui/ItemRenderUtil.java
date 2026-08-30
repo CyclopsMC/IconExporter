@@ -41,7 +41,11 @@ public class ItemRenderUtil {
 
     protected static void renderGuiItem(PoseStack p_275246_, ItemStack p_275195_, int p_275214_, int p_275658_, BakedModel p_275740_, float scale) {
         p_275246_.pushPose();
-        p_275246_.scale(scale / 16, scale / 16, 1);
+        // This scaling must be uniform: PoseStack#scale reacts to a non-uniform scale by scaling the
+        // normal matrix by the inverse of it, which squashes every vertex normal and flattens the
+        // diffuse lighting of 3D (block) models. Exported block icons then come out significantly
+        // darker than the same block looks in the inventory.
+        p_275246_.scale(scale / 16, scale / 16, scale / 16);
         p_275246_.translate((float)p_275214_, (float)p_275658_, 100.0F);
         p_275246_.translate(8.0F, 8.0F, 0.0F);
         p_275246_.mulPose((new Matrix4f()).scaling(1.0F, -1.0F, 1.0F));

@@ -33,3 +33,7 @@ changelog.txt
 
 loader-neoforge/.cache
 loader-neoforge/config
+
+# ClientDevBridge session state (golden images are intentionally kept)
+.clientdevbridge/*
+!.clientdevbridge/golden/
